@@ -1,0 +1,41 @@
+version: "3.9"
+services:
+  db:
+    image: postgres
+    container_name: db
+    #TODO: put envs to .env
+    environment:
+      - POSTGRES_DB=mydb
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypass
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - .:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U myuser -d mydb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  liquibase:
+    image: liquibase/liquibase:4.9.1
+    container_name: liquibase
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./src/main/resources/db/changelog/:/liquibase/db/changelog/
+    #TODO: put envs to .env
+    command: [
+      /liquibase/liquibase,
+      --username=myuser,
+      --password=mypass,
+      --driver=org.postgresql.Driver,
+      --url=jdbc:postgresql://db:5432/mydb,
+      --changeLogFile=db/changelog/db.changelog-master.yaml,
+      update,
+    ]
