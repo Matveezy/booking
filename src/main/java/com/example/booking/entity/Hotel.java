@@ -1,13 +1,16 @@
 package com.example.booking.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.io.Serializable;
 
 @Data
 @Entity
+@Builder
 @Table(name = "HOTEL")
 @NoArgsConstructor
+@AllArgsConstructor
 public class Hotel {
 
     @Id
@@ -17,6 +20,9 @@ public class Hotel {
 
     @Column(name = "NAME", nullable = false)
     private String name;
+
+    @Column(name = "CITY", nullable = false)
+    private String city;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "HOTELCLASS", nullable = false)
