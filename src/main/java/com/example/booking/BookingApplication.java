@@ -8,9 +8,7 @@ import org.springframework.context.annotation.Profile;
 public class BookingApplication {
 
     public static void main(String[] args) {
-        SpringApplication application = new SpringApplication(BookingApplication.class);
-        application.setAdditionalProfiles("prod");
-        application.run(args);
+        SpringApplication.run(BookingApplication.class, args);
     }
 
 }
