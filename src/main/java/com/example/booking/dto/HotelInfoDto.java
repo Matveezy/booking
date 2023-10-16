@@ -17,13 +17,11 @@ public class HotelInfoDto {
     private String name;
     private String city;
     private HotelClass hotelClass;
-    private Long userScore;
 
     public HotelInfoDto(Hotel hotel) {
         this.id = hotel.getId();
         this.name = hotel.getName();
         this.city = hotel.getCity();
         this.hotelClass = hotel.getHotelClass();
-        this.userScore = hotel.getUserScore();
     }
 }

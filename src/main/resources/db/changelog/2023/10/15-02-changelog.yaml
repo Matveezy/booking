@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1697372518909-1
+      author: agazizov (generated)
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: price
+                  type: BIGINT
+            tableName: room
+  - changeSet:
+      id: 1697372518909-2
+      author: agazizov (generated)
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: price
+            tableName: room
+  - changeSet:
+      id: 1697372518909-3
+      author: agazizov (generated)
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropColumn:
+            columnName: floor
+            tableName: room
+        - dropColumn:
+            columnName: maxguestscount
+            tableName: room
+  - changeSet:
+      id: 1697372518909-5
+      author: agazizov (generated)
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropColumn:
+            columnName: userscore
+            tableName: hotel
+

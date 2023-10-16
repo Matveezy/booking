@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @Entity
@@ -28,4 +29,8 @@ public class User {
 
     @Column(name = "DATE0FBIRTH", nullable = false)
     private Instant dateOfBirth;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Hotel> ownedHotels;
+
 }
