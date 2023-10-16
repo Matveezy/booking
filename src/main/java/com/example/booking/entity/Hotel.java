@@ -28,7 +28,12 @@ public class Hotel {
     @Column(name = "HOTELCLASS", nullable = false)
     private HotelClass hotelClass;
 
-    @Column(name = "USERSCORE")
-    private Long userScore;
+    @ManyToOne
+    @JoinTable(
+            name = "HOTELOWNER",
+            joinColumns = @JoinColumn(name = "HOTELID"),
+            inverseJoinColumns = @JoinColumn(name = "USERID")
+    )
+    private User owner;
 
 }

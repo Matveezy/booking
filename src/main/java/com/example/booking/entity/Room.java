@@ -15,7 +15,7 @@ public class Room {
     @Column(name = "ID", nullable = false)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "HOTELID")
     private Hotel hotel;
 
@@ -23,12 +23,10 @@ public class Room {
     @Column(name = "ROOMCLASS", nullable = false)
     private RoomClass roomClass;
 
-    @Column(name = "MAXGUESTSCOUNT", nullable = false)
-    private Long maxGuestsCount;
-
     @Column(name = "ROOMNUMBER", nullable = false)
     private Long roomNumber;
 
-    @Column(name = "FLOOR", nullable = false)
-    private Long floor;
+    @Column(name = "PRICE", nullable = false)
+    private Long price;
+
 }
