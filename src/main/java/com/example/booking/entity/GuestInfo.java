@@ -1,13 +1,19 @@
 package com.example.booking.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.Instant;
 
 @Data
 @Entity
 @Table(name = "GUESTINFO")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class GuestInfo {
 
     @Id
@@ -21,8 +27,8 @@ public class GuestInfo {
     @Column(name = "SURNAME", nullable = false)
     private String surname;
 
-    @Column(name = "DATEOFBIRTH", nullable = false)
-    private Long dateOfBirth;
+    @Column(nullable = false)
+    private Instant birthDate;
 
     @Column(name = "PASSPORT", nullable = false)
     private String passport;
