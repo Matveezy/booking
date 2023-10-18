@@ -4,17 +4,20 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
-@Builder
 @Table(name = "HOTEL")
+@ToString(exclude = {"orders"})
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Hotel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Long id;
 
@@ -27,6 +30,10 @@ public class Hotel {
     @Enumerated(EnumType.STRING)
     @Column(name = "HOTELCLASS", nullable = false)
     private HotelClass hotelClass;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "hotel")
+    private List<Order> orders = new ArrayList<>();
 
     @ManyToOne
     @JoinTable(
