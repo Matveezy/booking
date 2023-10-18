@@ -1,17 +1,22 @@
 package com.example.booking.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
 @Table(name = "ROOM")
+@ToString(exclude = {"ordersThisRoom"})
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Room {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Long id;
 
@@ -28,5 +33,9 @@ public class Room {
 
     @Column(name = "PRICE", nullable = false)
     private Long price;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "room")
+    private List<Order> ordersThisRoom = new ArrayList<>();
 
 }

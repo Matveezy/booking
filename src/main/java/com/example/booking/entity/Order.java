@@ -1,32 +1,52 @@
 package com.example.booking.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
 
 @Data
-@Embeddable
-@Table(name = "HOTEL")
+@Entity
+@Table(name = "orders")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Order {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "USERID")
     private User user;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "HOTELID")
     private Hotel hotel;
 
-    @Column(name = "DATEIN", nullable = false)
+    @Column(nullable = false)
     private Instant dateIn;
 
-    @Column(name = "DATEOUT", nullable = false)
+    @Column(nullable = false)
     private Instant dateOut;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ROOMCLASS", nullable = false)
-    private RoomClass roomClass;
+    @Column(nullable = false)
+    private Instant createdAt;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Room room;
+
+    public void setUser(User user) {
+        this.user = user;
+        user.getUserOrders().add(this);
+    }
+
+    public void setHotel(Hotel hotel) {
+        this.hotel = hotel;
+        hotel.getOrders().add(this);
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+        room.getOrdersThisRoom().add(this);
+    }
 }
