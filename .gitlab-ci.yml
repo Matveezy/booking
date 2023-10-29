@@ -1,0 +1,5 @@
+image: maven:3.8.3-openjdk-17
+
+tests:
+  script:
+    - mvn validate test
