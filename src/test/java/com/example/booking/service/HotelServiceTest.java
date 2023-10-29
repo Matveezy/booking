@@ -4,9 +4,10 @@ import com.example.booking.dto.HotelInfoDto;
 import com.example.booking.dto.HotelsFilterSearchDto;
 import com.example.booking.entity.HotelClass;
 import com.example.booking.exception.HotelNotFoundException;
+import integration.IntegrationTestBase;
+import integration.annotation.IT;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
@@ -14,27 +15,24 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
-@SpringBootTest
-@Sql(value = "/db/data/hotel-data.sql", executionPhase = BEFORE_TEST_METHOD)
-@Sql(value = "/db/data/clear-data.sql", executionPhase = AFTER_TEST_METHOD)
-class HotelServiceTest {
+@IT
+@RequiredArgsConstructor
+@Sql(value = {"/db/data/init-data.sql"}, executionPhase = BEFORE_TEST_METHOD)
+class HotelServiceTest extends IntegrationTestBase {
 
-    @Autowired
-    private HotelService hotelService;
+    private final HotelService hotelService;
 
     @Test
     void findHotelInfo() {
         var expected = HotelInfoDto.builder()
-                .id(0L)
+                .id(10000L)
                 .city("London")
                 .name("hotel1")
-                .userScore(90L)
                 .hotelClass(HotelClass.FIVE_STARS)
                 .build();
-        var actual = hotelService.findHotelInfo(0);
+        var actual = hotelService.findHotelInfo(10000);
 
         assertEquals(expected, actual);
 
@@ -56,17 +54,17 @@ class HotelServiceTest {
         assertThat(page1.size())
                 .isEqualTo(10);
         assertThat(page1)
-                .containsAll(List.of(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L));
+                .containsAll(List.of(10000L, 100L, 200L, 300L, 400L, 500L, 600L, 700L, 800L, 900L));
 
         assertThat(page2.size())
                 .isEqualTo(10);
         assertThat(page2)
-                .containsAll(List.of(10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L));
+                .containsAll(List.of(1000L, 1100L, 1200L, 1300L, 1400L, 1500L, 1600L, 1700L, 1800L, 1900L));
 
         assertThat(page3.size())
                 .isEqualTo(1);
         assertThat(page3)
-                .containsAll(List.of(20L));
+                .containsAll(List.of(2000L));
     }
 
     @Test
