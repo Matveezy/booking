@@ -48,7 +48,7 @@ public class HotelService {
     }
 
     public List<HotelInfoDto> findHotelsByCityAndHotelClass(String city, HotelClass hotelClass, int page) {
-        Pageable pageable = PageRequest.of(0, MAX_PAGE_SIZE);
+        Pageable pageable = PageRequest.of(page, MAX_PAGE_SIZE);
         return hotelRepo.findByCityAndHotelClass(city, hotelClass, pageable).stream()
                 .map(HotelInfoDto::new)
                 .toList();

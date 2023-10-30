@@ -10,6 +10,7 @@ import integration.annotation.IT;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.Optional;
 
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @IT
 @RequiredArgsConstructor
+@Sql("classpath:sql/data.sql")
 public class AdminServiceIT extends IntegrationTestBase {
 
     private final AdminService adminService;
