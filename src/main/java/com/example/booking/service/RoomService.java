@@ -63,10 +63,9 @@ public class RoomService {
         }
     }
 
-    public RoomInfoDto findRoomInfo(long id) {
-        var room = roomRepository.findRoomById(id)
+    public Room findRoom(long id) {
+        return roomRepository.findRoomById(id)
                 .orElseThrow(() -> new RoomNotFoundException(id));
-        return new RoomInfoDto(room);
     }
 
     private List<Room> findRoomsByHotel(long hotel, int page) {
