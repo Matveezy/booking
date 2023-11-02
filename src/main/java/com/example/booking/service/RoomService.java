@@ -5,8 +5,11 @@ import com.example.booking.exception.RoomNotFoundException;
 import com.example.booking.mapper.RoomReadMapper;
 import com.example.booking.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.time.Instant;
 import java.util.List;
 
@@ -17,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -30,43 +34,60 @@ public class RoomService {
     private final RoomReadMapper roomReadMapper;
 
     @Transactional
-    public Long saveRoom(RoomCreateDto roomCreateDto) {
+    public Long saveRoom(RoomCreateDto roomCreateDto) throws AccessDeniedException {
         Optional<Hotel> optionalHotel = hotelRepository.findHotelById(roomCreateDto.getHotelId());
         if (optionalHotel.isEmpty()) {
             throw new HotelNotFoundException(roomCreateDto.getHotelId());
         }
         Hotel hotel = optionalHotel.get();
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Room room = Room.builder()
-                .hotel(hotel)
-                .roomClass(roomCreateDto.getRoomClass())
-                .roomNumber(roomCreateDto.getRoomNumber())
-                .price(roomCreateDto.getPrice())
-                .build();
+        if (Objects.equals(hotel.getOwner().getLogin(), principal.getUsername())) {
+            Room room = Room.builder()
+                    .hotel(hotel)
+                    .roomClass(roomCreateDto.getRoomClass())
+                    .roomNumber(roomCreateDto.getRoomNumber())
+                    .price(roomCreateDto.getPrice())
+                    .build();
 
-        roomRepository.save(room);
-        return room.getId();
+            roomRepository.save(room);
+            return room.getId();
+        } else {
+            throw new AccessDeniedException("You do not have permission to create a room in this hotel");
+        }
     }
 
     @Transactional
-    public void updateRoom(RoomUpdateDto roomUpdateDto, long roomId) {
+    public void updateRoom(RoomUpdateDto roomUpdateDto, long roomId) throws AccessDeniedException {
         Optional<Room> optionalRoom = roomRepository.findById(roomId);
         if (optionalRoom.isEmpty()) {
             throw new RoomNotFoundException(roomId);
         }
         Room room = optionalRoom.get();
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Hotel hotel = hotelRepository.findHotelById(roomRepository.findRoomById(roomId).get().getHotel().getId()).get();
 
-        room.setRoomClass(roomUpdateDto.getRoomClass());
-        room.setRoomNumber(roomUpdateDto.getRoomNumber());
-        room.setPrice(roomUpdateDto.getPrice());
+        if (Objects.equals(hotel.getOwner().getLogin(), principal.getUsername())) {
+            room.setRoomClass(roomUpdateDto.getRoomClass());
+            room.setRoomNumber(roomUpdateDto.getRoomNumber());
+            room.setPrice(roomUpdateDto.getPrice());
 
-        roomRepository.save(room);
+            roomRepository.save(room);
+        } else {
+            throw new AccessDeniedException("You do not have permission to modify this room");
+        }
     }
 
     @Transactional
-    public void deleteRoom(long roomId) {
+    public void deleteRoom(long roomId) throws AccessDeniedException {
         if (roomRepository.existsById(roomId)) {
-            roomRepository.deleteById(roomId);
+            UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Hotel hotel = hotelRepository.findHotelById(roomRepository.findRoomById(roomId).get().getHotel().getId()).get();
+            if (Objects.equals(hotel.getOwner().getLogin(), principal.getUsername())) {
+                roomRepository.deleteById(roomId);
+            } else {
+                throw new AccessDeniedException("You do not have permission to delete this room");
+            }
         } else {
             throw new RoomNotFoundException(roomId);
         }
