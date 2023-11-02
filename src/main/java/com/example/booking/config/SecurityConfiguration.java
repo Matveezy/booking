@@ -23,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static com.example.booking.entity.Role.*;
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.*;
 
 @Configuration
 @EnableWebSecurity
@@ -36,11 +37,12 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(config -> config
-                                .requestMatchers(AntPathRequestMatcher.antMatcher("/auth/**")).permitAll()
-                                .requestMatchers(AntPathRequestMatcher.antMatcher("/admin/users/**")).hasAuthority(ADMIN.getAuthority())
-//                        .requestMatchers(AntPathRequestMatcher.antMatcher("/")).permitAll()
-                                .anyRequest()
-                                .authenticated()
+                        .requestMatchers(antMatcher("/auth/**")).permitAll()
+                        .requestMatchers(antMatcher("/admin/users/**")).hasAuthority(ADMIN.getAuthority())
+                        .requestMatchers(antMatcher("/hotel/**"), antMatcher("/room/**")).hasAnyAuthority(OWNER.getAuthority(), ADMIN.getAuthority())
+                        .requestMatchers(antMatcher("/info/**"), antMatcher("/order/"), antMatcher("/orders/**"), antMatcher("/cancel/**")).permitAll()
+                        .anyRequest()
+                        .authenticated()
                 )
                 .sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
