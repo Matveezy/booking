@@ -1,7 +1,7 @@
 package com.example.booking.controller;
 
 import com.example.booking.dto.*;
-import com.example.booking.entity.Order;
+import com.example.booking.exception.HotelNotFoundException;
 import com.example.booking.service.HotelService;
 import com.example.booking.service.OrdersService;
 import com.example.booking.service.RoomService;
@@ -21,7 +21,8 @@ public class UserController {
 
     @GetMapping("/info/hotel/{id}")
     public HotelInfoDto getHotelInfo(@PathVariable long id) {
-        return hotelService.findHotelInfo(id);
+        return hotelService.findHotelInfo(id)
+                .orElseThrow(() -> new HotelNotFoundException(id));
     }
 
     @GetMapping("/info/hotels")
@@ -40,7 +41,7 @@ public class UserController {
     }
 
     @GetMapping("/orders/{userId}")
-    public List<OrderDto> showOrders(@PathVariable long userId) {
+    public List<OrderReadDto> showOrders(@PathVariable long userId) {
         return ordersService.showOrders(userId);
     }
 
@@ -48,5 +49,4 @@ public class UserController {
     public void cancelOrder(@PathVariable long orderId) {
         ordersService.cancelOrder(orderId);
     }
-
 }
