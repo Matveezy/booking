@@ -1,8 +1,7 @@
 package com.example.booking.dto;
 
 import com.example.booking.entity.RoomClass;
-import com.example.booking.validation.DatesValid;
-import jakarta.validation.constraints.NotNull;
+import com.example.booking.validation.Dates;
 import lombok.*;
 
 import java.time.Instant;
@@ -12,8 +11,8 @@ import java.time.Instant;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@DatesValid
-public class RoomsFilterSearchDto implements DateInOutDto{
+@Dates
+public class RoomsFilterSearchDto implements DateInOutDto {
     private RoomClass roomClass;
     private Instant dateIn;
     private Instant dateOut;

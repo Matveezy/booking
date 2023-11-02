@@ -2,15 +2,13 @@ package com.example.booking.mapper;
 
 import com.example.booking.dto.RoomInfoDto;
 import com.example.booking.entity.Room;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class RoomReadMapper implements Mapper<Room, RoomInfoDto> {
 
-    private final OrderReadMapper orderReadMapper;
-    private final HotelReadMapper hotelReadMapper;
+    private OrderReadMapper orderReadMapper;
+    private HotelReadMapper hotelReadMapper;
 
     @Override
     public RoomInfoDto map(Room from) {
@@ -26,5 +24,13 @@ public class RoomReadMapper implements Mapper<Room, RoomInfoDto> {
                 )
                 .roomNumber(from.getRoomNumber())
                 .build();
+    }
+
+    public void setOrderReadMapper(OrderReadMapper orderReadMapper) {
+        this.orderReadMapper = orderReadMapper;
+    }
+
+    public void setHotelReadMapper(HotelReadMapper hotelReadMapper) {
+        this.hotelReadMapper = hotelReadMapper;
     }
 }
