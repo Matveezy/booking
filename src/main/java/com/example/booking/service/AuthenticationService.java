@@ -13,9 +13,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuthenticationService {
 
     private final UserRepository userRepository;
@@ -23,6 +25,7 @@ public class AuthenticationService {
     private final UserCreateMapper userCreateMapper;
     private final AuthenticationManager authenticationManager;
 
+    @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
         User userEntityToSave = userCreateMapper.map(request);
         userRepository.save(userEntityToSave);

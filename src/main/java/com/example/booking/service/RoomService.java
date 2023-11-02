@@ -2,28 +2,34 @@ package com.example.booking.service;
 
 import com.example.booking.entity.*;
 import com.example.booking.exception.RoomNotFoundException;
+import com.example.booking.mapper.RoomReadMapper;
 import com.example.booking.repository.RoomRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+
 import com.example.booking.dto.*;
 import com.example.booking.exception.HotelNotFoundException;
 import com.example.booking.repository.HotelRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RoomService {
     public final static int MAX_PAGE_SIZE = 10;
 
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
+    private final RoomReadMapper roomReadMapper;
 
+    @Transactional
     public Long saveRoom(RoomCreateDto roomCreateDto) {
         Optional<Hotel> optionalHotel = hotelRepository.findHotelById(roomCreateDto.getHotelId());
         if (optionalHotel.isEmpty()) {
@@ -31,16 +37,18 @@ public class RoomService {
         }
         Hotel hotel = optionalHotel.get();
 
-        Room room = new Room();
-        room.setHotel(hotel);
-        room.setRoomClass(roomCreateDto.getRoomClass());
-        room.setRoomNumber(roomCreateDto.getRoomNumber());
-        room.setPrice(roomCreateDto.getPrice());
+        Room room = Room.builder()
+                .hotel(hotel)
+                .roomClass(roomCreateDto.getRoomClass())
+                .roomNumber(roomCreateDto.getRoomNumber())
+                .price(roomCreateDto.getPrice())
+                .build();
 
-        Room savedRoom = roomRepository.save(room);
-        return savedRoom.getId();
+        roomRepository.save(room);
+        return room.getId();
     }
 
+    @Transactional
     public void updateRoom(RoomUpdateDto roomUpdateDto, long roomId) {
         Optional<Room> optionalRoom = roomRepository.findById(roomId);
         if (optionalRoom.isEmpty()) {
@@ -55,6 +63,7 @@ public class RoomService {
         roomRepository.save(room);
     }
 
+    @Transactional
     public void deleteRoom(long roomId) {
         if (roomRepository.existsById(roomId)) {
             roomRepository.deleteById(roomId);
@@ -86,6 +95,7 @@ public class RoomService {
         }
     }
 
+
     public boolean datesIntersection(Instant dateIn1, Instant dateOut1, Instant dateIn2, Instant dateOut2) {
         var maxStart = dateIn1.isAfter(dateIn2) ? dateIn1 : dateIn2;
         var minEnd = dateOut1.isBefore(dateOut2) ? dateOut1 : dateOut2;
@@ -104,8 +114,7 @@ public class RoomService {
         var out = filter.getDateOut() == null ? Instant.MIN : filter.getDateOut();
         return findRooms(filter, hotel, page).stream()
                 .filter(r -> isRoomFree(r, in, out))
-                .map(RoomInfoDto::new)
+                .map(roomReadMapper::map)
                 .toList();
     }
-
 }

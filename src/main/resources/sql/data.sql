@@ -67,13 +67,13 @@ VALUES ((SELECT id from users where login = 'alex@yandex.ru'), 200),
 
 INSERT INTO orders
     (date_in, date_out, created_at, room_id, hotel_id, user_id)
-VALUES ('2023-10-10', '2023-10-12', now()::timestamp, 1, (select id from hotel where name = 'Novotel'),
+VALUES ('2023-10-10', '2023-10-12', now()::timestamp, (select id from room where roomnumber = 1339), (select id from hotel where name = 'Novotel'),
         (SELECT id from users where login = 'alex@yandex.ru')),
-       ('2023-12-29', '2023-12-31', now()::timestamp, 2, (select id from hotel where name = 'Novotel'),
+       ('2023-12-29', '2023-12-31', now()::timestamp, (select id from room where roomnumber = 1338), (select id from hotel where name = 'Novotel'),
         (SELECT id from users where login = 'julia@mail.ru')),
-       ('2024-01-01', '2024-01-03', now()::timestamp, 3, (select id from hotel where name = 'Novotel'),
+       ('2024-01-01', '2024-01-03', now()::timestamp, (select id from room where roomnumber = 1337), (select id from hotel where name = 'Novotel'),
         (SELECT id from users where login = 'bob123@yahoo.com')),
-       ('2023-11-10', '2023-11-12', now()::timestamp, 3, (select id from hotel where name = 'Novotel'),
+       ('2023-11-10', '2023-11-12', now()::timestamp, (select id from room where roomnumber = 4), (select id from hotel where name = 'Novotel'),
         (SELECT id from users where login = 'kate@gmail.com'));
 
 
