@@ -1,4 +1,4 @@
-package integration;
+package com.example.booking.service;
 
 import com.example.booking.dto.*;
 import com.example.booking.entity.HotelClass;
@@ -6,6 +6,7 @@ import com.example.booking.entity.Role;
 import com.example.booking.entity.RoomClass;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import integration.IntegrationTestBase;
 import integration.annotation.IT;
 import integration.annotation.WithMockCustomUser;
 import lombok.RequiredArgsConstructor;

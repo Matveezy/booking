@@ -1,4 +1,4 @@
-package integration;
+package com.example.booking.service;
 
 import com.example.booking.dto.UserPermissionUpdateDto;
 import com.example.booking.entity.Role;
@@ -6,6 +6,7 @@ import com.example.booking.entity.User;
 import com.example.booking.repository.UserRepository;
 import com.example.booking.service.AdminService;
 import com.example.booking.service.UserService;
+import integration.IntegrationTestBase;
 import integration.annotation.IT;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @IT
 @RequiredArgsConstructor
 @Sql("classpath:sql/data.sql")
-public class AdminServiceIT extends IntegrationTestBase {
+public class AdminServiceTest extends IntegrationTestBase {
 
     private final AdminService adminService;
     private final UserService userService;
