@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface OrdersRepository extends PagingAndSortingRepository<Order, Long>, CrudRepository<Order, Long> {
     List<Order> findOrdersByUser_Id(long userId);
+    List<Order> findOrdersByRoom_Id(long roomId);
     void deleteById(long id);
 }

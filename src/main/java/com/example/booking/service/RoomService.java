@@ -3,6 +3,7 @@ package com.example.booking.service;
 import com.example.booking.entity.*;
 import com.example.booking.exception.RoomNotFoundException;
 import com.example.booking.mapper.RoomReadMapper;
+import com.example.booking.repository.OrdersRepository;
 import com.example.booking.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +33,7 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
     private final RoomReadMapper roomReadMapper;
+    private final OrdersRepository ordersRepository;
 
     @Transactional
     public Long saveRoom(RoomCreateDto roomCreateDto) throws AccessDeniedException {
@@ -124,7 +126,7 @@ public class RoomService {
     }
 
     public boolean isRoomFree(Room room, Instant dateIn, Instant dateOut) {
-        return room.getOrdersThisRoom().stream()
+        return ordersRepository.findOrdersByRoom_Id(room.getId()).stream()
                 .filter(o -> datesIntersection(o.getDateIn(), o.getDateOut(), dateIn, dateOut))
                 .toList()
                 .isEmpty();
