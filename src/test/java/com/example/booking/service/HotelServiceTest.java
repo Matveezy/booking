@@ -1,14 +1,19 @@
 package com.example.booking.service;
 
+import com.example.booking.dto.HotelCreateDto;
 import com.example.booking.dto.HotelInfoDto;
+import com.example.booking.dto.HotelUpdateDto;
 import com.example.booking.dto.HotelsFilterSearchDto;
 import com.example.booking.entity.HotelClass;
+import com.example.booking.exception.HotelNotFoundException;
 import integration.IntegrationTestBase;
 import integration.annotation.IT;
+import integration.annotation.WithMockCustomUser;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,6 +26,15 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 class HotelServiceTest extends IntegrationTestBase {
 
     private final HotelService hotelService;
+
+    private final String OWNER_LOGIN = "alexandr@gmail.com";
+
+    private final long NOT_EXIST_HOTEL_ID = 1488;
+
+    private final long EXIST_HOTEL_ID = 13;
+
+    private final long OTHER_HOTEL_ID = 11;
+
 
     @Test
     void findHotelInfo() {
@@ -98,6 +112,77 @@ class HotelServiceTest extends IntegrationTestBase {
         assertThat(hotelService.findHotels(filter, 0).size())
                 .isEqualTo(2);
 
+    }
+
+    @Test
+    @WithMockCustomUser(username = OWNER_LOGIN)
+    void deleteHotelSuccess() {
+        assertDoesNotThrow(() -> hotelService.deleteHotel(EXIST_HOTEL_ID));
+    }
+
+    @Test
+    @WithMockCustomUser(username = OWNER_LOGIN)
+    void deleteHotelNotExists() {
+        assertThrows(HotelNotFoundException.class,
+                () -> hotelService.deleteHotel(NOT_EXIST_HOTEL_ID));
+    }
+
+    @Test
+    @WithMockCustomUser(username = OWNER_LOGIN)
+    void deleteHotelAccessDenied() {
+        assertThrows(AccessDeniedException.class,
+                () -> hotelService.deleteHotel(OTHER_HOTEL_ID));
+    }
+
+    @Test
+    @WithMockCustomUser(username = OWNER_LOGIN)
+    void updateHotelSuccess() {
+        HotelUpdateDto hotelUpdateDto = HotelUpdateDto.builder()
+                .name("asdasd")
+                .hotelClass(HotelClass.FIVE_STARS)
+                .city("qweqwe")
+                .build();
+        assertDoesNotThrow(() -> {
+            hotelService.updateHotel(hotelUpdateDto, EXIST_HOTEL_ID);
+        });
+    }
+
+    @Test
+    @WithMockCustomUser(username = OWNER_LOGIN)
+    void updateHotelNotExists() {
+        HotelUpdateDto hotelUpdateDto = HotelUpdateDto.builder()
+                .name("asdasd")
+                .hotelClass(HotelClass.FIVE_STARS)
+                .city("qweqwe")
+                .build();
+        assertThrows(HotelNotFoundException.class,
+                () -> hotelService.updateHotel(hotelUpdateDto, NOT_EXIST_HOTEL_ID));
+    }
+
+    @Test
+    @WithMockCustomUser(username = OWNER_LOGIN)
+    void updateHotelAccessDenied() {
+        HotelUpdateDto hotelUpdateDto = HotelUpdateDto.builder()
+                .name("asdasd")
+                .hotelClass(HotelClass.FIVE_STARS)
+                .city("qweqwe")
+                .build();
+        assertThrows(AccessDeniedException.class,
+                () -> hotelService.updateHotel(hotelUpdateDto, OTHER_HOTEL_ID));
+    }
+
+    @Test
+    @WithMockCustomUser(username = OWNER_LOGIN)
+    void saveHotelSuccess() {
+        HotelCreateDto hotelCreateDto = HotelCreateDto.builder()
+                .name("asdasd")
+                .hotelClass(HotelClass.FIVE_STARS)
+                .city("qweqwe")
+                .build();
+
+        assertDoesNotThrow(() -> {
+            hotelService.saveHotel(hotelCreateDto);
+        });
     }
 
 }
