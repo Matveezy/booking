@@ -13,14 +13,7 @@ public class OrderReadMapper implements Mapper<Order, OrderReadDto> {
 
     private final UserReadMapper userReadMapper;
     private final HotelReadMapper hotelReadMapper;
-
-    @Autowired
-    private RoomReadMapper roomReadMapper;
-
-    @PostConstruct
-    public void init() {
-        roomReadMapper.setOrderReadMapper(this);
-    }
+    private final RoomReadMapper roomReadMapper;
 
     @Override
     public OrderReadDto map(Order from) {

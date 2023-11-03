@@ -37,5 +37,4 @@ public class Room {
     @Builder.Default
     @OneToMany(mappedBy = "room")
     private List<Order> ordersThisRoom = new ArrayList<>();
-
 }

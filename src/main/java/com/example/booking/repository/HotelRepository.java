@@ -13,6 +13,7 @@ import java.util.Optional;
 @Repository
 public interface HotelRepository extends PagingAndSortingRepository<Hotel, Long>, CrudRepository<Hotel, Long> {
     Optional<Hotel> findHotelById(long id);
+    Optional<Hotel> findHotelByName(String name);
     List<Hotel> findByCity(String city, Pageable pageable);
     List<Hotel> findByHotelClass(HotelClass hotelClass, Pageable pageable);
     List<Hotel> findByCityAndHotelClass(String city, HotelClass hotelClass, Pageable pageable);

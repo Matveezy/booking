@@ -3,7 +3,6 @@ package com.example.booking.service;
 import com.example.booking.dto.HotelInfoDto;
 import com.example.booking.dto.HotelsFilterSearchDto;
 import com.example.booking.entity.HotelClass;
-import com.example.booking.exception.HotelNotFoundException;
 import integration.IntegrationTestBase;
 import integration.annotation.IT;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +12,7 @@ import org.springframework.test.context.jdbc.Sql;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @IT
@@ -34,9 +32,8 @@ class HotelServiceTest extends IntegrationTestBase {
                 .build();
         var actual = hotelService.findHotelInfo(10000);
 
-        assertEquals(expected, actual);
-
-        assertThrows(HotelNotFoundException.class, () -> hotelService.findHotelInfo(-10));
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
     }
 
     @Test

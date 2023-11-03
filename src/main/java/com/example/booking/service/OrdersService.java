@@ -2,7 +2,6 @@ package com.example.booking.service;
 
 import com.example.booking.dto.BookRoomDto;
 import com.example.booking.dto.OrderReadDto;
-import com.example.booking.dto.RoomInfoDto;
 import com.example.booking.dto.UserReadDto;
 import com.example.booking.entity.Order;
 import com.example.booking.mapper.OrderReadMapper;

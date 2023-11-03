@@ -16,6 +16,5 @@ public class RoomInfoDto {
     private long roomNumber;
     private RoomClass roomClass;
     private long price;
-    private List<OrderReadDto> ordersThisRoom;
     private HotelInfoDto hotelInfoDto;
 }
