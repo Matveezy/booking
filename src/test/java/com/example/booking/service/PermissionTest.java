@@ -25,7 +25,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @IT
 @AutoConfigureMockMvc
 @RequiredArgsConstructor
-@Sql(value = "classpath:sql/data.sql")
 public class PermissionTest extends IntegrationTestBase {
 
     private final MockMvc mockMvc;
