@@ -16,4 +16,3 @@ public class UserReadDto {
     String name;
     Role role;
 }
-

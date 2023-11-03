@@ -7,6 +7,7 @@ import com.example.booking.dto.RoomUpdateDto;
 import com.example.booking.service.HotelService;
 import com.example.booking.service.RoomService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -15,14 +16,14 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.AccessDeniedException;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class OwnerController {
 
     private final HotelService hotelService;
     private final RoomService roomService;
 
     @PostMapping("/hotel")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     public ResponseEntity<String> createHotel(@Validated @RequestBody HotelCreateDto dto) {
         Long createdId = hotelService.saveHotel(dto);
         String response = "Created hotel id=" + createdId;
@@ -30,7 +31,7 @@ public class OwnerController {
     }
 
     @PutMapping("/hotel/{id}")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     public ResponseEntity<String> updateHotel(@Validated @RequestBody HotelUpdateDto dto,
                                               @PathVariable long id) throws AccessDeniedException {
         hotelService.updateHotel(dto, id);
@@ -39,7 +40,7 @@ public class OwnerController {
     }
 
     @DeleteMapping("/hotel/{id}")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     public ResponseEntity<String> deleteHotel(@PathVariable long id) throws AccessDeniedException {
         hotelService.deleteHotel(id);
         String response = "Hotel was successfully deleted";
@@ -47,7 +48,7 @@ public class OwnerController {
     }
 
     @PostMapping("/room")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     public ResponseEntity<String> createRoom(@Validated @RequestBody RoomCreateDto dto) throws AccessDeniedException {
         Long createdId = roomService.saveRoom(dto);
         String response = "Created room id=" + createdId;
@@ -55,7 +56,7 @@ public class OwnerController {
     }
 
     @PutMapping("/room/{id}")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     public ResponseEntity<String> updateRoom(@Validated @RequestBody RoomUpdateDto dto, @PathVariable long id) throws AccessDeniedException {
         roomService.updateRoom(dto, id);
         String response = "Room was successfully updated";
@@ -63,7 +64,7 @@ public class OwnerController {
     }
 
     @DeleteMapping("/room/{id}")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     public ResponseEntity<String> deleteRoom(@PathVariable long id) throws AccessDeniedException {
         roomService.deleteRoom(id);
         String response = "Hotel was successfully deleted";

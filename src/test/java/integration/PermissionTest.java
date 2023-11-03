@@ -1,7 +1,9 @@
 package integration;
 
 import com.example.booking.dto.*;
+import com.example.booking.entity.HotelClass;
 import com.example.booking.entity.Role;
+import com.example.booking.entity.RoomClass;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import integration.annotation.IT;
@@ -38,7 +40,7 @@ public class PermissionTest extends IntegrationTestBase {
     void loginByAnyUser() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .content(asJsonString(RegisterRequest.builder()
-                                .login("log")
+                                .login("login@gmail.com")
                                 .pass("pass")
                                 .name("name")
                                 .dateOfBirth(Instant.now())
@@ -52,7 +54,7 @@ public class PermissionTest extends IntegrationTestBase {
     void registerByAnyUser() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .content(asJsonString(RegisterRequest.builder()
-                                .login("log_to_reg")
+                                .login("login@gmail.com")
                                 .pass("pass")
                                 .name("name")
                                 .dateOfBirth(Instant.now())
@@ -67,7 +69,7 @@ public class PermissionTest extends IntegrationTestBase {
         mockMvc.perform(put("/admin/users/permission")
                         .content(
                                 asJsonString(UserPermissionUpdateDto.builder()
-                                        .login("users")
+                                        .login("users@gmail.com")
                                         .role(Role.OWNER)
                                         .build()
                                 )
@@ -106,7 +108,15 @@ public class PermissionTest extends IntegrationTestBase {
     @Test
     @WithMockCustomUser(username = USER_LOGIN)
     void createHotelByUser() throws Exception {
-        mockMvc.perform(post("/hotel"))
+        mockMvc.perform(post("/hotel")
+                        .content(asJsonString(
+                                HotelCreateDto.builder()
+                                        .name("Hotel Name")
+                                        .city("Saint-P")
+                                        .hotelClass(HotelClass.FIVE_STARS)
+                                        .build()
+                        ))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is(403));
     }
 
@@ -115,7 +125,11 @@ public class PermissionTest extends IntegrationTestBase {
     void updateHotelByUser() throws Exception {
         mockMvc.perform(put("/hotel" + "/1")
                         .content(asJsonString(
-                                HotelUpdateDto.builder().build()
+                                HotelUpdateDto.builder()
+                                        .hotelClass(HotelClass.FIVE_STARS)
+                                        .city("Saint-P")
+                                        .name("Hotel Name")
+                                        .build()
                         ))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is(403));
@@ -131,14 +145,32 @@ public class PermissionTest extends IntegrationTestBase {
     @Test
     @WithMockCustomUser(username = USER_LOGIN)
     void createRoomByUser() throws Exception {
-        mockMvc.perform(put("/room"))
+        mockMvc.perform(post("/room")
+                        .content(asJsonString(
+                                RoomCreateDto.builder()
+                                        .hotelId(1)
+                                        .roomNumber(123)
+                                        .roomClass(RoomClass.DOUBLE)
+                                        .price(52)
+                                        .build()
+                        ))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is(403));
     }
 
     @Test
     @WithMockCustomUser(username = USER_LOGIN)
     void updateRoomByUser() throws Exception {
-        mockMvc.perform(post("/room"))
+        mockMvc.perform(post("/room")
+                        .content(asJsonString(
+                                RoomCreateDto.builder()
+                                        .hotelId(1)
+                                        .roomNumber(123)
+                                        .roomClass(RoomClass.DOUBLE)
+                                        .price(52)
+                                        .build()
+                        ))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is(403));
     }
 

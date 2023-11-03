@@ -34,14 +34,6 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(config -> config
-                        .requestMatchers(antMatcher("/auth/**")).permitAll()
-                        .requestMatchers(antMatcher("/admin/users/**")).hasAuthority(ADMIN.getAuthority())
-                        .requestMatchers(antMatcher("/hotel/**"), antMatcher("/room/**")).hasAnyAuthority(OWNER.getAuthority(), ADMIN.getAuthority())
-                        .requestMatchers(antMatcher("/info/**"), antMatcher("/order/"), antMatcher("/orders/**"), antMatcher("/cancel/**")).permitAll()
-                        .anyRequest()
-                        .authenticated()
-                )
                 .sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(
