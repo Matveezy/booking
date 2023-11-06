@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @IT
 @RequiredArgsConstructor
-@Sql("classpath:sql/data.sql")
 class UserServiceTest extends IntegrationTestBase {
 
     private final UserService userService;

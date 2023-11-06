@@ -12,7 +12,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -21,5 +21,6 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 @Transactional
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @Sql(value = "classpath:sql/data.sql")
+@Sql(value = "classpath:sql/after-test.sql", executionPhase = AFTER_TEST_METHOD)
 public @interface IT {
 }

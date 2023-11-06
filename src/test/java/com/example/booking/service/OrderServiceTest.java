@@ -13,7 +13,6 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
 @IT
 @RequiredArgsConstructor
-@Sql(value = "/db/data/init-data.sql", executionPhase = BEFORE_TEST_METHOD)
 public class OrderServiceTest extends IntegrationTestBase {
 
     private final OrdersService ordersService;

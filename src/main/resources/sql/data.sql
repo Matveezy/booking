@@ -1,6 +1,7 @@
 INSERT into users
     (name, login, pass, date0fbirth, role)
-VALUES ('Ivan1233', 'ivan@gmail.com', '$2a$10$HYXOcVWzKL0XuW24c4bN1elBGxqDSeSq1UDTRtBIzIiXYli0nM2Ze', '2002-01-01', 'USER'),
+VALUES ('Ivan1233', 'ivan@gmail.com', '$2a$10$HYXOcVWzKL0XuW24c4bN1elBGxqDSeSq1UDTRtBIzIiXYli0nM2Ze', '2002-01-01',
+        'USER'),
        ('Alex', 'alex@yandex.ru', '$2a$10$HYXOcVWzKL0XuW24c4bN1elBGxqDSeSq1UDTRtBIzIiXYli0nM2Ze', '1999-02-06', 'USER'),
        ('Julia', 'julia@mail.ru', '$2a$10$HYXOcVWzKL0XuW24c4bN1elBGxqDSeSq1UDTRtBIzIiXYli0nM2Ze', '2003-01-09', 'USER'),
        ('Bob', 'bob123@yahoo.com', '$2a$10$HYXOcVWzKL0XuW24c4bN1elBGxqDSeSq1UDTRtBIzIiXYli0nM2Ze', '2006-06-01',
@@ -20,14 +21,14 @@ VALUES ('Ivan1233', 'ivan@gmail.com', '$2a$10$HYXOcVWzKL0XuW24c4bN1elBGxqDSeSq1U
         'ADMIN');
 
 INSERT into hotel
-    (id, name, hotelclass, city)
-VALUES (11, 'Domina St. Petersburg', 'THREE_STARS', 'Saint-Petersburg'),
-       (12, 'Taleon Imperial', 'FIVE_STARS', 'Saint-Petersburg'),
-       (13, 'Novotel', 'FOUR_STARS', 'Saint-Petersburg'),
-       (14, 'W St. Petersburg', 'ONE_STAR', 'Saint-Petersburg'),
-       (15, 'SO/St Petersburg', 'FIVE_STARS', 'Saint-Petersburg'),
-       (16, 'Solo Sokos Hotel Palace Bridge', 'FOUR_STARS', 'Saint-Petersburg'),
-       (17, 'Kempinski Hotel Moika 22', 'THREE_STARS', 'Saint-Petersburg');
+    (name, hotelclass, city)
+VALUES ('Domina St. Petersburg', 'THREE_STARS', 'Saint-Petersburg'),
+       ('Taleon Imperial', 'FIVE_STARS', 'Saint-Petersburg'),
+       ('Novotel', 'FOUR_STARS', 'Saint-Petersburg'),
+       ('W St. Petersburg', 'ONE_STAR', 'Saint-Petersburg'),
+       ('SO/St Petersburg', 'FIVE_STARS', 'Saint-Petersburg'),
+       ('Solo Sokos Hotel Palace Bridge', 'FOUR_STARS', 'Saint-Petersburg'),
+       ('Kempinski Hotel Moika 22', 'THREE_STARS', 'Saint-Petersburg');
 
 INSERT into guestinfo
     (name, surname, birth_date, passport)
@@ -37,19 +38,19 @@ VALUES ('Ivan', 'Ivanov', '2000-01-01', '12345666'),
        ('Vladimir', 'Vasiliev', '1998-08-06', '12345666');
 
 INSERT INTO room
-    (id, hotelid, roomclass, roomnumber, price)
-VALUES (11, (SELECT id from hotel where name = 'Novotel'), 'TRIPLE', 1339, 4000),
-       (12, (SELECT id from hotel where name = 'Novotel'), 'SINGLE', 1338, 2500),
-       (13, (SELECT id from hotel where name = 'Novotel'), 'DOUBLE', 1337, 3200),
-       (14, (SELECT id from hotel where name = 'Novotel'), 'QUAD', 1342, 5000),
-       (15, (SELECT id from hotel where name = 'Solo Sokos Hotel Palace Bridge'), 'TRIPLE', 12, 6000),
-       (16, (SELECT id from hotel where name = 'Solo Sokos Hotel Palace Bridge'), 'SINGLE', 456, 3600),
-       (17, (SELECT id from hotel where name = 'Solo Sokos Hotel Palace Bridge'), 'DOUBLE', 26, 5000),
-       (18, (SELECT id from hotel where name = 'Solo Sokos Hotel Palace Bridge'), 'QUAD', 998, 8500),
-       (19, (SELECT id from hotel where name = 'Domina St. Petersburg'), 'TRIPLE', 1, 2800),
-       (110, (SELECT id from hotel where name = 'Domina St. Petersburg'), 'SINGLE', 2, 1900),
-       (111, (SELECT id from hotel where name = 'Domina St. Petersburg'), 'DOUBLE', 3, 2400),
-       (112, (SELECT id from hotel where name = 'Domina St. Petersburg'), 'QUAD', 4, 3200);
+    (hotelid, roomclass, roomnumber, price)
+VALUES ((SELECT id from hotel where name = 'Novotel'), 'TRIPLE', 1339, 4000),
+       ((SELECT id from hotel where name = 'Novotel'), 'SINGLE', 1338, 2500),
+       ((SELECT id from hotel where name = 'Novotel'), 'DOUBLE', 1337, 3200),
+       ((SELECT id from hotel where name = 'Novotel'), 'QUAD', 1342, 5000),
+       ((SELECT id from hotel where name = 'Solo Sokos Hotel Palace Bridge'), 'TRIPLE', 12, 6000),
+       ((SELECT id from hotel where name = 'Solo Sokos Hotel Palace Bridge'), 'SINGLE', 456, 3600),
+       ((SELECT id from hotel where name = 'Solo Sokos Hotel Palace Bridge'), 'DOUBLE', 26, 5000),
+       ((SELECT id from hotel where name = 'Solo Sokos Hotel Palace Bridge'), 'QUAD', 998, 8500),
+       ((SELECT id from hotel where name = 'Domina St. Petersburg'), 'TRIPLE', 1, 2800),
+       ((SELECT id from hotel where name = 'Domina St. Petersburg'), 'SINGLE', 2, 1900),
+       ((SELECT id from hotel where name = 'Domina St. Petersburg'), 'DOUBLE', 3, 2400),
+       ((SELECT id from hotel where name = 'Domina St. Petersburg'), 'QUAD', 4, 3200);
 
 insert into hotelowner
     (hotelid, userid)
@@ -67,13 +68,13 @@ VALUES ((SELECT id from users where login = 'alex@yandex.ru'), 200),
 
 INSERT INTO orders
     (date_in, date_out, created_at, room_id, hotel_id, user_id)
-VALUES ('2023-10-10', '2023-10-12', now()::timestamp, (select id from room where roomnumber = 1339), (select id from hotel where name = 'Novotel'),
+VALUES ('2023-10-10', '2023-10-12', now()::timestamp, (select id from room where roomnumber = 1339), 3,
         (SELECT id from users where login = 'alex@yandex.ru')),
-       ('2023-12-29', '2023-12-31', now()::timestamp, (select id from room where roomnumber = 1338), (select id from hotel where name = 'Novotel'),
+       ('2023-12-29', '2023-12-31', now()::timestamp, (select id from room where roomnumber = 1338), 3,
         (SELECT id from users where login = 'julia@mail.ru')),
-       ('2024-01-01', '2024-01-03', now()::timestamp, (select id from room where roomnumber = 1337), (select id from hotel where name = 'Novotel'),
+       ('2024-01-01', '2024-01-03', now()::timestamp, (select id from room where roomnumber = 1337), 3,
         (SELECT id from users where login = 'bob123@yahoo.com')),
-       ('2023-11-10', '2023-11-12', now()::timestamp, (select id from room where roomnumber = 4), (select id from hotel where name = 'Novotel'),
+       ('2023-11-10', '2023-11-12', now()::timestamp, (select id from room where roomnumber = 4), 3,
         (SELECT id from users where login = 'kate@gmail.com'));
 
 
