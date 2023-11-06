@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @IT
 @RequiredArgsConstructor
-@Sql("classpath:sql/data.sql")
 public class AdminServiceTest extends IntegrationTestBase {
 
     private final AdminService adminService;

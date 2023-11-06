@@ -33,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @IT
 @RequiredArgsConstructor
-@Sql("classpath:sql/data.sql")
 class RoomServiceTest extends IntegrationTestBase {
 
     private final RoomService roomService;
@@ -43,11 +42,11 @@ class RoomServiceTest extends IntegrationTestBase {
 
     private final long NOT_EXIST_HOTEL_ID = 1488;
 
-    private final long EXIST_HOTEL_ID = 13;
+    private final long EXIST_HOTEL_ID = 3;
 
-    private final long OTHER_HOTEL_ID = 11;
+    private final long OTHER_HOTEL_ID = 1;
 
-    private final long EXIST_ROOM_ID = 11;
+    private final long EXIST_ROOM_ID = 1;
 
     private final long NOT_EXIST_ROOM_ID = 1337;
 
@@ -98,7 +97,7 @@ class RoomServiceTest extends IntegrationTestBase {
     void updateRoomSuccess() {
         RoomUpdateDto roomUpdateDto = RoomUpdateDto.builder()
                 .roomClass(RoomClass.DOUBLE)
-                .roomNumber(13)
+                .roomNumber(1339)
                 .price(10000)
                 .build();
         assertDoesNotThrow(() -> roomService.updateRoom(roomUpdateDto, EXIST_ROOM_ID));
@@ -109,7 +108,7 @@ class RoomServiceTest extends IntegrationTestBase {
     void updateRoomNotExists() {
         RoomUpdateDto roomUpdateDto = RoomUpdateDto.builder()
                 .roomClass(RoomClass.DOUBLE)
-                .roomNumber(13)
+                .roomNumber(3)
                 .price(10000)
                 .build();
         assertThrows(RoomNotFoundException.class,
@@ -121,7 +120,7 @@ class RoomServiceTest extends IntegrationTestBase {
     void updateRoomAccessDenied() {
         RoomUpdateDto roomUpdateDto = RoomUpdateDto.builder()
                 .roomClass(RoomClass.DOUBLE)
-                .roomNumber(13)
+                .roomNumber(3)
                 .price(10000)
                 .build();
         assertThrows(AccessDeniedException.class,
