@@ -1,3 +1,3 @@
-ALTER SEQUENCE room_id_seq RESTART WITH 1;
-ALTER SEQUENCE hotel_id_seq RESTART WITH 1;
-ALTER SEQUENCE users_id_seq RESTART WITH 1;
+SELECT setval(pg_get_serial_sequence('room', 'id'), 1) FROM room;
+SELECT setval(pg_get_serial_sequence('hotel', 'id'), 1) FROM hotel;
+SELECT setval(pg_get_serial_sequence('users', 'id'), 1) FROM users;
