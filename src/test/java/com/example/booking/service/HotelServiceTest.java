@@ -30,9 +30,9 @@ class HotelServiceTest extends IntegrationTestBase {
 
     private final long NOT_EXIST_HOTEL_ID = 1488;
 
-    private final long EXIST_HOTEL_ID = 13;
+    private final long EXIST_HOTEL_ID = 3;
 
-    private final long OTHER_HOTEL_ID = 11;
+    private final long OTHER_HOTEL_ID = 1;
 
 
     @Test

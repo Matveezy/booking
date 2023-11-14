@@ -50,7 +50,7 @@ class RoomServiceTest extends IntegrationTestBase {
 
     private final long NOT_EXIST_ROOM_ID = 1337;
 
-    private final long OTHER_ROOM_ID = 110;
+    private final long OTHER_ROOM_ID = 10;
 
     private static Stream<Arguments> datesSource() {
         return Stream.of(
