@@ -21,7 +21,6 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TES
 @Transactional
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @Sql(value = "classpath:sql/data.sql")
-@Sql(value = "classpath:db/data/init-data.sql")
 @Sql(value = "classpath:sql/after-test.sql", executionPhase = AFTER_TEST_METHOD)
 public @interface IT {
 }
