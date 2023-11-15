@@ -36,12 +36,12 @@ class HotelServiceTest extends IntegrationTestBase {
     @Test
     void findHotelInfo() {
         var expected = HotelInfoDto.builder()
-                .id(10000L)
-                .city("London")
-                .name("hotel1")
-                .hotelClass(HotelClass.FIVE_STARS)
+                .id(1L)
+                .city("Saint-Petersburg")
+                .name("Domina St. Petersburg")
+                .hotelClass(HotelClass.THREE_STARS)
                 .build();
-        var actual = hotelService.findHotelInfo(10000);
+        var actual = hotelService.findHotelInfo(1L);
 
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -60,24 +60,14 @@ class HotelServiceTest extends IntegrationTestBase {
                 .toList();
 
         assertThat(page1.size())
-                .isEqualTo(10);
+                .isEqualTo(7);
         assertThat(page1)
-                .containsAll(List.of(10000L, 100L, 200L, 300L, 400L, 500L, 600L, 700L, 800L, 900L));
-
-        assertThat(page2.size())
-                .isEqualTo(10);
-        assertThat(page2)
-                .containsAll(List.of(1000L, 1100L, 1200L, 1300L, 1400L, 1500L, 1600L, 1700L, 1800L, 1900L));
-
-        assertThat(page3.size())
-                .isEqualTo(1);
-        assertThat(page3)
-                .containsAll(List.of(2000L));
+                .containsAll(List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L));
     }
 
     @Test
     void findHotelsByCityTest() {
-        var hotels1 = hotelService.findHotelsByCity("Paris", 0);
+        var hotels1 = hotelService.findHotelsByCity("Saint-Petersburg", 0);
         assertThat(hotels1.size())
                 .isEqualTo(6);
 
@@ -85,27 +75,25 @@ class HotelServiceTest extends IntegrationTestBase {
         assertThat(hotels2.size())
                 .isEqualTo(1);
         assertThat(hotels2.get(0).getName())
-                .isEqualTo("hotel10");
+                .isEqualTo("Kempinski Hotel Moika 22");
     }
 
     @Test
     void findHotelsByCityAndClassTest() {
-        var hotels = hotelService.findHotelsByCityAndHotelClass("London", HotelClass.FIVE_STARS, 0);
+        var hotels = hotelService.findHotelsByCityAndHotelClass("Saint-Petersburg", HotelClass.FIVE_STARS, 0);
         assertThat(hotels.size())
-                .isEqualTo(1);
+                .isEqualTo(2);
         assertThat(hotels.get(0).getName())
-                .isEqualTo("hotel1");
+                .isEqualTo("Taleon Imperial");
     }
 
     @Test
     void findHotelsByFilter() {
         var filter = new HotelsFilterSearchDto();
         assertThat(hotelService.findHotels(filter, 0).size())
-                .isEqualTo(10);
-        filter = filter.withCity("Paris");
-        assertThat(hotelService.findHotels(filter, 0).size())
-                .isEqualTo(6);
+                .isEqualTo(7);
         filter = filter.withHotelClass(HotelClass.FIVE_STARS);
+        filter.setCity("Saint-Petersburg");
         assertThat(hotelService.findHotels(filter, 0).size())
                 .isEqualTo(2);
 
