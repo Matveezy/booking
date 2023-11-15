@@ -27,7 +27,7 @@ public class OrderEntityMapper implements Mapper<CreateOrderDto, Order> {
         Optional<User> maybeUser = userRepository.findUserById(createOrderDto.getUserId());
         Optional<Room> maybeRoom = roomRepository.findRoomById(createOrderDto.getRoomId());
         if (maybeUser.isEmpty() || maybeRoom.isEmpty()) {
-            throw new EntityNotFoundException("Entity nor found!");
+            throw new EntityNotFoundException("Entity not found!");
         }
         Order order = Order.builder()
                 .user(maybeUser.get())
