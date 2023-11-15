@@ -28,7 +28,7 @@ VALUES ('Domina St. Petersburg', 'THREE_STARS', 'Saint-Petersburg'),
        ('W St. Petersburg', 'ONE_STAR', 'Saint-Petersburg'),
        ('SO/St Petersburg', 'FIVE_STARS', 'Saint-Petersburg'),
        ('Solo Sokos Hotel Palace Bridge', 'FOUR_STARS', 'Saint-Petersburg'),
-       ('Kempinski Hotel Moika 22', 'THREE_STARS', 'Saint-Petersburg');
+       ('Kempinski Hotel Moika 22', 'THREE_STARS', 'Amsterdam');
 
 INSERT into guestinfo
     (name, surname, birth_date, passport)
