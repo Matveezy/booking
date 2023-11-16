@@ -13,6 +13,7 @@ import com.example.booking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @Component
@@ -29,13 +30,13 @@ public class OrderEntityMapper implements Mapper<CreateOrderDto, Order> {
         if (maybeUser.isEmpty() || maybeRoom.isEmpty()) {
             throw new EntityNotFoundException("Entity not found!");
         }
-        Order order = Order.builder()
+        return Order.builder()
                 .user(maybeUser.get())
                 .hotel(maybeRoom.get().getHotel())
                 .room(maybeRoom.get())
                 .dateIn(createOrderDto.getDateIn())
                 .dateOut(createOrderDto.getDateOut())
+                .createdAt(Instant.now())
                 .build();
-        return order;
     }
 }
