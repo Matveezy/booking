@@ -34,6 +34,7 @@ public class RoomService {
     private final HotelRepository hotelRepository;
     private final RoomReadMapper roomReadMapper;
     private final OrdersRepository ordersRepository;
+    private final HotelService hotelService;
 
     @Transactional
     public Long saveRoom(RoomCreateDto roomCreateDto) throws AccessDeniedException {
@@ -98,6 +99,20 @@ public class RoomService {
     public Room findRoom(long id) {
         return roomRepository.findRoomById(id)
                 .orElseThrow(() -> new RoomNotFoundException(id));
+    }
+
+    public Optional<RoomInfoDto> findRoomInfo(long id) {
+        var room = findRoom(id);
+        if (room == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(RoomInfoDto.builder()
+                .roomClass(room.getRoomClass())
+                .roomNumber(room.getRoomNumber())
+                .price(room.getPrice())
+                .hotelInfoDto(hotelService.findHotelInfo(room.getHotel().getId()).orElse(null))
+                .build());
     }
 
     private List<Room> findRoomsByHotel(long hotel, int page) {
