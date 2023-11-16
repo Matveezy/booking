@@ -14,6 +14,7 @@ public class RoomReadMapper implements Mapper<Room, RoomInfoDto> {
     public RoomInfoDto map(Room from) {
         return RoomInfoDto
                 .builder()
+                .id(from.getId())
                 .price(from.getPrice())
                 .roomClass(from.getRoomClass())
                 .hotelInfoDto(hotelReadMapper.map(from.getHotel()))

@@ -1,14 +1,12 @@
 package com.example.booking.service;
 
-import com.example.booking.dto.HotelCreateDto;
-import com.example.booking.dto.HotelInfoDto;
-import com.example.booking.dto.HotelUpdateDto;
-import com.example.booking.dto.HotelsFilterSearchDto;
+import com.example.booking.dto.*;
 import com.example.booking.entity.Hotel;
 import com.example.booking.entity.HotelClass;
 import com.example.booking.entity.User;
 import com.example.booking.exception.HotelNotFoundException;
 import com.example.booking.mapper.HotelReadMapper;
+import com.example.booking.mapper.UserReadMapper;
 import com.example.booking.repository.HotelRepository;
 import com.example.booking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +32,7 @@ public class HotelService {
     private final HotelRepository hotelRepo;
     private final UserRepository userRepository;
     private final HotelReadMapper hotelReadMapper;
+    private final UserReadMapper userReadMapper;
 
     public Optional<HotelInfoDto> findHotelInfo(long id) {
         return hotelRepo.findHotelById(id)
@@ -69,6 +68,11 @@ public class HotelService {
         } else {
             return findHotelsByCityAndHotelClass(filter.getCity(), filter.getHotelClass(), page);
         }
+    }
+
+    public Optional<UserReadDto> getHotelOwner(Long hotelId) {
+        return hotelRepo.findHotelById(hotelId)
+                .map(hotelEntity -> userReadMapper.map(hotelEntity.getOwner()));
     }
 
     @Transactional

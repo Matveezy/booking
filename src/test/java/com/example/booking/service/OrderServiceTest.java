@@ -3,22 +3,18 @@ package com.example.booking.service;
 import com.example.booking.dto.BookRoomDto;
 import com.example.booking.dto.OrderReadDto;
 import com.example.booking.dto.RoomInfoDto;
+import com.example.booking.dto.UserReadDto;
 import com.example.booking.repository.OrdersRepository;
-import com.example.booking.repository.UserRepository;
 import integration.IntegrationTestBase;
 import integration.annotation.IT;
 import integration.annotation.WithMockCustomUser;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.test.context.jdbc.Sql;
-
 import java.time.Instant;
-
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
+import static org.junit.jupiter.api.Assertions.*;
 
 @IT
 @RequiredArgsConstructor
@@ -37,9 +33,9 @@ public class OrderServiceTest extends IntegrationTestBase {
         var userOpt = userService.findUserByName("ivan@gmail.com");
         assertThat(userOpt).isPresent();
 
-        var room = roomService.findRoom(1);
-        assertThat(room).isNotNull();
-
+        var roomOptional = roomService.findRoom(1);
+        assertTrue(roomOptional.isPresent());
+        RoomInfoDto room = roomOptional.get();
         var userId = userOpt.get().getId();
         var bookRoomDto = BookRoomDto.builder()
                 .dateIn(Instant.ofEpochSecond(10000))
@@ -48,7 +44,9 @@ public class OrderServiceTest extends IntegrationTestBase {
                 .build();
 
         var balanceUserBefore = walletService.getUserBalance(userId);
-        var balanceOwnerBefore = walletService.getUserBalance(roomService.findRoom(1).getHotel().getOwner().getId());
+        Optional<UserReadDto> hotelOwner = hotelService.getHotelOwner(roomOptional.get().getHotelInfoDto().getId());
+        assertTrue(hotelOwner.isPresent());
+        var balanceOwnerBefore = walletService.getUserBalance(hotelOwner.get().getId());
 
         ordersService.makeOrder(bookRoomDto, room.getId());
 
@@ -56,14 +54,16 @@ public class OrderServiceTest extends IntegrationTestBase {
                 .contains(OrderReadDto.builder()
                         .dateIn(Instant.ofEpochSecond(10000))
                         .dateOut(Instant.ofEpochSecond(200000))
-                        .room(roomService.findRoomInfo(room.getId()).orElse(null))
-                        .hotel(hotelService.findHotelInfo(room.getHotel().getId()).orElse(null))
+                        .room(roomService.findRoom(room.getId()).orElse(null))
+                        .hotel(hotelService.findHotelInfo(room.getHotelInfoDto().getId()).orElse(null))
                         .userReadDto(userService.findUserById(userId).orElse(null))
                         .build()
                 );
 
         var balanceUserAfter = walletService.getUserBalance(userId);
-        var balanceOwnerAfter = walletService.getUserBalance(roomService.findRoom(1).getHotel().getOwner().getId());
+        hotelOwner = hotelService.getHotelOwner(roomOptional.get().getHotelInfoDto().getId());
+        assertTrue(hotelOwner.isPresent());
+        var balanceOwnerAfter = walletService.getUserBalance(hotelOwner.get().getId());
 
         assertThat(balanceUserBefore + balanceOwnerBefore)
                 .isEqualTo(balanceUserAfter + balanceOwnerAfter);
@@ -82,6 +82,7 @@ public class OrderServiceTest extends IntegrationTestBase {
         assertThat(userOpt).isPresent();
 
         var room = roomService.findRoom(1);
+        assertTrue(room.isPresent());
         assertThat(room).isNotNull();
 
         var userId = userOpt.get().getId();
@@ -92,9 +93,11 @@ public class OrderServiceTest extends IntegrationTestBase {
                 .build();
 
         var balanceUserBefore = walletService.getUserBalance(userId);
-        var balanceOwnerBefore = walletService.getUserBalance(roomService.findRoom(1).getHotel().getOwner().getId());
+        Optional<UserReadDto> hotelOwner = hotelService.getHotelOwner(room.get().getHotelInfoDto().getId());
+        assertTrue(hotelOwner.isPresent());
+        var balanceOwnerBefore = walletService.getUserBalance(hotelOwner.get().getId());
 
-        ordersService.makeOrder(bookRoomDto, room.getId());
+        ordersService.makeOrder(bookRoomDto, room.get().getId());
 
         var order = ordersRepository.findOrdersByUser_Id(userId).get(0);
         ordersService.cancelOrder(order.getId());
@@ -102,7 +105,7 @@ public class OrderServiceTest extends IntegrationTestBase {
 
 
         var balanceUserAfter = walletService.getUserBalance(userId);
-        var balanceOwnerAfter = walletService.getUserBalance(roomService.findRoom(1).getHotel().getOwner().getId());
+        var balanceOwnerAfter = walletService.getUserBalance(hotelOwner.get().getId());
 
         assertThat(balanceUserBefore).isEqualTo(balanceUserAfter);
         assertThat(balanceOwnerBefore).isEqualTo(balanceOwnerAfter);

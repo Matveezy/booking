@@ -5,11 +5,13 @@ import com.example.booking.exception.HotelNotFoundException;
 import com.example.booking.service.HotelService;
 import com.example.booking.service.OrdersService;
 import com.example.booking.service.RoomService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -25,7 +27,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('USER')")
     public HotelInfoDto getHotelInfo(@PathVariable long id) {
         return hotelService.findHotelInfo(id)
-                .orElseThrow(() -> new HotelNotFoundException(id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/info/hotels")
@@ -42,8 +44,10 @@ public class UserController {
 
     @PostMapping("/order/{roomId}")
     @PreAuthorize("hasAuthority('USER')")
-    public void bookRoom(@Validated @RequestBody BookRoomDto order, @PathVariable long roomId) {
-        ordersService.makeOrder(order, roomId);
+    public ResponseEntity<?> bookRoom(@Validated @RequestBody BookRoomDto order, @PathVariable long roomId) {
+        return ordersService.makeOrder(order, roomId)
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.badRequest().build();
     }
 
     @GetMapping("/orders/{userId}")
@@ -53,8 +57,9 @@ public class UserController {
     }
 
     @PostMapping("/cancel/{orderId}")
-    @PreAuthorize("hasAuthority('USER')") //todo checks
-    public void cancelOrder(@PathVariable long orderId) {
-        ordersService.cancelOrder(orderId);
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<?> cancelOrder(@PathVariable long orderId) {
+        if (ordersService.cancelOrder(orderId)) return ResponseEntity.ok().build();
+        else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 }

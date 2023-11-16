@@ -16,39 +16,41 @@ public class WalletService {
     private final UserService userService;
 
     @Transactional
-    public void transferMoney(long fromUser, long toUser, long amount) {
-        var walletFrom = walletRepository.findWalletByUser_Id(fromUser)
-                .orElseThrow(() -> new IllegalArgumentException("Wallet with user id " + fromUser + " not found"));
-        var walletTo = walletRepository.findWalletByUser_Id(toUser)
-                .orElseThrow(() -> new IllegalArgumentException("Wallet with user id " + toUser + " not found"));
+    public boolean transferMoney(long fromUser, long toUser, long amount) {
+        var walletFrom = walletRepository.findWalletByUser_Id(fromUser);
+        if (walletFrom.isEmpty()) return false;
+        var walletTo = walletRepository.findWalletByUser_Id(toUser);
+        if (walletTo.isEmpty()) return false;
+        walletFrom.get().setBalance(walletFrom.get().getBalance() - amount);
+        walletTo.get().setBalance(walletTo.get().getBalance() + amount);
 
-        walletFrom.setBalance(walletFrom.getBalance() - amount);
-        walletTo.setBalance(walletTo.getBalance() + amount);
-
-        walletRepository.save(walletFrom);
-        walletRepository.save(walletTo);
+        walletRepository.save(walletFrom.get());
+        walletRepository.save(walletTo.get());
+        return true;
     }
 
+
     @Transactional
-    public void bookRoom(Order order) {
+    public boolean bookRoom(Order order) {
         var fromUser = order.getUser().getId();
         var toUser = order.getHotel().getOwner().getId();
         var days = Duration.between(order.getDateIn(), order.getDateOut()).getSeconds() / (60 * 60 * 24);
         var amount = order.getRoom().getPrice() * days;
-        transferMoney(fromUser, toUser, amount);
+        return transferMoney(fromUser, toUser, amount);
     }
 
+
     @Transactional
-    public void cancelRoom(Order order) {
+    public boolean cancelRoom(Order order) {
         var toUser = order.getUser().getId();
         var fromUser = order.getHotel().getOwner().getId();
         var days = Duration.between(order.getDateIn(), order.getDateOut()).getSeconds() / (60 * 60 * 24);
         var amount = order.getRoom().getPrice() * days;
-        transferMoney(fromUser, toUser, amount);
+        return transferMoney(fromUser, toUser, amount);
     }
 
     public long getUserBalance(long id) {
-        var user = userService.findUserEntityById(id)
+        var user = userService.findUserById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User with id " + id + " not found"));
 
         var wallet = walletRepository.findWalletByUser_Id(user.getId())
