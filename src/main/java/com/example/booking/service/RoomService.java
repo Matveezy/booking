@@ -68,8 +68,7 @@ public class RoomService {
         }
         Room room = optionalRoom.get();
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Hotel hotel = hotelRepository.findHotelById(roomRepository.findRoomById(roomId).get().getHotel().getId()).get();
-
+        Hotel hotel = room.getHotel();
         if (Objects.equals(hotel.getOwner().getLogin(), principal.getUsername())) {
             room.setRoomClass(roomUpdateDto.getRoomClass());
             room.setRoomNumber(roomUpdateDto.getRoomNumber());
@@ -82,50 +81,38 @@ public class RoomService {
     }
 
     @Transactional
-    public void deleteRoom(long roomId) throws AccessDeniedException {
+    public boolean deleteRoom(long roomId) {
         if (roomRepository.existsById(roomId)) {
+            Room room = roomRepository.findRoomById(roomId).get();
             UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            Hotel hotel = hotelRepository.findHotelById(roomRepository.findRoomById(roomId).get().getHotel().getId()).get();
+            Hotel hotel = room.getHotel();
             if (Objects.equals(hotel.getOwner().getLogin(), principal.getUsername())) {
                 roomRepository.deleteById(roomId);
-            } else {
-                throw new AccessDeniedException("You do not have permission to delete this room");
+                return true;
             }
-        } else {
-            throw new RoomNotFoundException(roomId);
         }
+        return false;
     }
 
-    public Room findRoom(long id) {
+    public Optional<RoomInfoDto> findRoom(long id) {
         return roomRepository.findRoomById(id)
-                .orElseThrow(() -> new RoomNotFoundException(id));
+                .map(roomReadMapper::map);
     }
 
-    public Optional<RoomInfoDto> findRoomInfo(long id) {
-        var room = findRoom(id);
-        if (room == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(RoomInfoDto.builder()
-                .roomClass(room.getRoomClass())
-                .roomNumber(room.getRoomNumber())
-                .price(room.getPrice())
-                .hotelInfoDto(hotelService.findHotelInfo(room.getHotel().getId()).orElse(null))
-                .build());
-    }
-
-    private List<Room> findRoomsByHotel(long hotel, int page) {
+    private List<RoomInfoDto> findRoomsByHotel(long hotel, int page) {
         Pageable pageable = PageRequest.of(page, MAX_PAGE_SIZE);
-        return roomRepository.findRoomsByHotel_Id(hotel, pageable);
+        return roomRepository.findRoomsByHotel_Id(hotel, pageable)
+                .stream().map(roomReadMapper::map)
+                .toList();
     }
 
-    private List<Room> findRoomsByHotelAndRoomClass(long hotel, RoomClass roomClass, int page) {
+    private List<RoomInfoDto> findRoomsByHotelAndRoomClass(long hotel, RoomClass roomClass, int page) {
         Pageable pageable = PageRequest.of(page, MAX_PAGE_SIZE);
-        return roomRepository.findRoomsByRoomClassAndHotel_Id(roomClass, hotel, pageable);
+        return roomRepository.findRoomsByRoomClassAndHotel_Id(roomClass, hotel, pageable)
+                .stream().map(roomReadMapper::map).toList();
     }
 
-    private List<Room> findRooms(RoomsFilterSearchDto filter, long hotel, int page) {
+    private List<RoomInfoDto> findRooms(RoomsFilterSearchDto filter, long hotel, int page) {
         if (filter.getRoomClass() == null) {
             return findRoomsByHotel(hotel, page);
         } else {
@@ -133,14 +120,13 @@ public class RoomService {
         }
     }
 
-
     public boolean datesIntersection(Instant dateIn1, Instant dateOut1, Instant dateIn2, Instant dateOut2) {
         var maxStart = dateIn1.isAfter(dateIn2) ? dateIn1 : dateIn2;
         var minEnd = dateOut1.isBefore(dateOut2) ? dateOut1 : dateOut2;
         return maxStart.isBefore(minEnd) || maxStart.equals(minEnd);
     }
 
-    public boolean isRoomFree(Room room, Instant dateIn, Instant dateOut) {
+    public boolean isRoomFree(RoomInfoDto room, Instant dateIn, Instant dateOut) {
         return ordersRepository.findOrdersByRoom_Id(room.getId()).stream()
                 .filter(o -> datesIntersection(o.getDateIn(), o.getDateOut(), dateIn, dateOut))
                 .toList()
@@ -152,7 +138,6 @@ public class RoomService {
         var out = filter.getDateOut() == null ? Instant.MIN : filter.getDateOut();
         return findRooms(filter, hotel, page).stream()
                 .filter(r -> isRoomFree(r, in, out))
-                .map(roomReadMapper::map)
                 .toList();
     }
 }

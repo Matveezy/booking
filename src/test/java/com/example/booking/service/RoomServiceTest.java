@@ -27,8 +27,7 @@ import java.time.ZoneId;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @IT
@@ -81,15 +80,13 @@ class RoomServiceTest extends IntegrationTestBase {
     @Test
     @WithMockCustomUser(username = OWNER_LOGIN)
     void deleteRoomNotExists() {
-        assertThrows(RoomNotFoundException.class,
-                () -> roomService.deleteRoom(NOT_EXIST_ROOM_ID));
+        assertFalse(roomService.deleteRoom(NOT_EXIST_ROOM_ID));
     }
 
     @Test
     @WithMockCustomUser(username = OWNER_LOGIN)
     void deleteHotelAccessDenied() {
-        assertThrows(AccessDeniedException.class,
-                () -> roomService.deleteRoom(OTHER_ROOM_ID));
+        assertFalse(roomService.deleteRoom(OTHER_ROOM_ID));
     }
 
     @Test

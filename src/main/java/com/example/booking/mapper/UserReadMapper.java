@@ -12,6 +12,7 @@ public class UserReadMapper implements Mapper<User, UserReadDto> {
     @Override
     public UserReadDto map(User from) {
         return UserReadDto.builder()
+                .id(from.getId())
                 .login(from.getLogin())
                 .name(from.getName())
                 .role(from.getRole())

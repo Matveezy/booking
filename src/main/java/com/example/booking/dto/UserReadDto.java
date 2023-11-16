@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class UserReadDto {
 
+    Long id;
     String login;
     String name;
     Role role;

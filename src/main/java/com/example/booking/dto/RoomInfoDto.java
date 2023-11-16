@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class RoomInfoDto {
 
+    private long id;
     private long roomNumber;
     private RoomClass roomClass;
     private long price;

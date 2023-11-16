@@ -33,11 +33,8 @@ public class UserService implements UserDetailsService {
                 .map(userReadMapper::map);
     }
 
-    public Optional<User> findUserEntityById(long id) {
-        return userRepository.findUserById(id);
-    }
-
-    public Optional<User> findUserByName(String name) {
-        return userRepository.findByLogin(name);
+    public Optional<UserReadDto> findUserByName(String name) {
+        return userRepository.findByLogin(name)
+                .map(userReadMapper::map);
     }
 }
