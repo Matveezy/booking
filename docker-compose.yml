@@ -39,3 +39,15 @@ services:
       --changeLogFile=db/changelog/db.changelog-master.yaml,
       update,
     ]
+  app:
+    image: 'booking.jar'
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - HOST=db
+      - PORT=5432
+      - NAME=mydb
+      - USER=myuser
+      - PASS=mypass
