@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -24,7 +25,8 @@ public class AuthenticationController {
     @PreAuthorize("permitAll()")
     public ResponseEntity<AuthenticationResponse> register(
             @RequestBody @Validated RegisterRequest request) {
-        return ResponseEntity.ok(authenticationService.register(request));
+        Optional<AuthenticationResponse> responseOptional = authenticationService.register(request);
+        return responseOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
     @PostMapping("/authenticate")
@@ -32,6 +34,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody @Validated AuthenticationRequest request
     ) {
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+        Optional<AuthenticationResponse> responseOptional = authenticationService.authenticate(request);
+        return responseOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
 }

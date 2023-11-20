@@ -4,6 +4,7 @@ import com.example.booking.dto.RoomCreateDto;
 import com.example.booking.dto.RoomUpdateDto;
 import com.example.booking.entity.RoomClass;
 import com.example.booking.exception.HotelNotFoundException;
+import com.example.booking.exception.NotEnoughPermissionException;
 import com.example.booking.exception.RoomNotFoundException;
 import com.example.booking.dto.RoomsFilterSearchDto;
 import com.example.booking.entity.RoomClass;
@@ -86,7 +87,7 @@ class RoomServiceTest extends IntegrationTestBase {
     @Test
     @WithMockCustomUser(username = OWNER_LOGIN)
     void deleteHotelAccessDenied() {
-        assertFalse(roomService.deleteRoom(OTHER_ROOM_ID));
+        assertThrows(NotEnoughPermissionException.class, () -> roomService.deleteRoom(OTHER_ROOM_ID));
     }
 
     @Test
@@ -120,7 +121,7 @@ class RoomServiceTest extends IntegrationTestBase {
                 .roomNumber(3)
                 .price(10000)
                 .build();
-        assertThrows(AccessDeniedException.class,
+        assertThrows(NotEnoughPermissionException.class,
                 () -> roomService.updateRoom(roomUpdateDto, OTHER_ROOM_ID));
     }
 
@@ -158,7 +159,7 @@ class RoomServiceTest extends IntegrationTestBase {
                 .roomNumber(13)
                 .price(10000)
                 .build();
-        assertThrows(AccessDeniedException.class,
+        assertThrows(NotEnoughPermissionException.class,
                 () -> roomService.saveRoom(roomCreateDto));
     }
 

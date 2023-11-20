@@ -11,8 +11,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @IT
 @RequiredArgsConstructor
-public class UserCreateMapperTest extends IntegrationTestBase {
-    private final UserCreateMapper mapper;
+public class RegisterRequestMapperTest extends IntegrationTestBase {
+    private final RegisterRequestMapper mapper;
 
     private final String TEST_LOGIN = "testlogin";
     private final String TEST_PASSWORD = "testpassword";

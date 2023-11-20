@@ -26,10 +26,11 @@ public class OrderEntityMapper implements Mapper<CreateOrderDto, Order> {
     @Override
     public Order map(CreateOrderDto createOrderDto) {
         Optional<User> maybeUser = userRepository.findUserById(createOrderDto.getUserId());
+        if (maybeUser.isEmpty())
+            throw new EntityNotFoundException("User with id: " + createOrderDto.getUserId() + " not found!");
         Optional<Room> maybeRoom = roomRepository.findRoomById(createOrderDto.getRoomId());
-        if (maybeUser.isEmpty() || maybeRoom.isEmpty()) {
-            throw new EntityNotFoundException("Entity not found!");
-        }
+        if (maybeRoom.isEmpty())
+            throw new EntityNotFoundException("Room with id + " + createOrderDto.getRoomId() + "not found!");
         return Order.builder()
                 .user(maybeUser.get())
                 .hotel(maybeRoom.get().getHotel())

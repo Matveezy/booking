@@ -6,13 +6,12 @@ import com.example.booking.dto.HotelUpdateDto;
 import com.example.booking.dto.HotelsFilterSearchDto;
 import com.example.booking.entity.HotelClass;
 import com.example.booking.exception.HotelNotFoundException;
+import com.example.booking.exception.NotEnoughPermissionException;
 import integration.IntegrationTestBase;
 import integration.annotation.IT;
 import integration.annotation.WithMockCustomUser;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
-
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -115,7 +114,7 @@ class HotelServiceTest extends IntegrationTestBase {
     @Test
     @WithMockCustomUser(username = OWNER_LOGIN)
     void deleteHotelAccessDenied() {
-        assertThrows(AccessDeniedException.class,
+        assertThrows(NotEnoughPermissionException.class,
                 () -> hotelService.deleteHotel(OTHER_HOTEL_ID));
     }
 
@@ -152,7 +151,7 @@ class HotelServiceTest extends IntegrationTestBase {
                 .hotelClass(HotelClass.FIVE_STARS)
                 .city("qweqwe")
                 .build();
-        assertThrows(AccessDeniedException.class,
+        assertThrows(NotEnoughPermissionException.class,
                 () -> hotelService.updateHotel(hotelUpdateDto, OTHER_HOTEL_ID));
     }
 

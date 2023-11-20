@@ -7,11 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 @RequiredArgsConstructor
-public class UserCreateMapper implements Mapper<RegisterRequest, User> {
+public class RegisterRequestMapper implements Mapper<RegisterRequest, User> {
 
     private final PasswordEncoder passwordEncoder;
 

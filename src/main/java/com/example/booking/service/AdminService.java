@@ -1,7 +1,7 @@
 package com.example.booking.service;
 
 import com.example.booking.dto.UserPermissionUpdateDto;
-import com.example.booking.repository.UserRepository;
+import com.example.booking.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,16 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AdminService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Transactional
-    public boolean updatePermission(UserPermissionUpdateDto userPermissionUpdateDto) {
-        return userRepository.findByLogin(userPermissionUpdateDto.getLogin())
-                .map(user -> {
-                            int countOfUpdateEntities = userRepository.updateRole(userPermissionUpdateDto.getRole(), userPermissionUpdateDto.getLogin());
-                            return countOfUpdateEntities > 0;
-                        }
-                )
-                .orElse(false);
+    public void updatePermission(UserPermissionUpdateDto userPermissionUpdateDto) {
+        userService.findByLogin(userPermissionUpdateDto.getLogin())
+                .map(userReadDto -> userService.updateRole(userPermissionUpdateDto.getRole(), userPermissionUpdateDto.getLogin()))
+                .orElseThrow((() -> new EntityNotFoundException("Can't retrieve user with login :" + userPermissionUpdateDto.getLogin())));
     }
+
 }

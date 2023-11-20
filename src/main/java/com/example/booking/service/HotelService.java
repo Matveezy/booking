@@ -5,10 +5,11 @@ import com.example.booking.entity.Hotel;
 import com.example.booking.entity.HotelClass;
 import com.example.booking.entity.User;
 import com.example.booking.exception.HotelNotFoundException;
+import com.example.booking.exception.NotEnoughPermissionException;
 import com.example.booking.mapper.HotelReadMapper;
+import com.example.booking.mapper.UserEntityMapper;
 import com.example.booking.mapper.UserReadMapper;
 import com.example.booking.repository.HotelRepository;
-import com.example.booking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,9 +30,10 @@ public class HotelService {
     public final static int MAX_PAGE_SIZE = 10;
 
     private final HotelRepository hotelRepo;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final HotelReadMapper hotelReadMapper;
     private final UserReadMapper userReadMapper;
+    private final UserEntityMapper userEntityMapper;
 
     public Optional<HotelInfoDto> findHotelInfo(long id) {
         return hotelRepo.findHotelById(id)
@@ -78,22 +79,22 @@ public class HotelService {
     @Transactional
     public Long saveHotel(HotelCreateDto hotelCreateDto) {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> optionalOwner = userRepository.findByLogin(principal.getUsername());
-        User owner = optionalOwner.get();
+        Optional<UserReadDto> userReadDtoOptional = userService.findByLogin(principal.getUsername());
+        User ownerEntity = userEntityMapper.map(userReadDtoOptional.get());
 
         Hotel hotel = Hotel.builder()
                 .name(hotelCreateDto.getName())
                 .city(hotelCreateDto.getCity())
                 .hotelClass(hotelCreateDto.getHotelClass())
-                .owner(owner)
+                .owner(ownerEntity)
                 .build();
 
-        Hotel savedHotel = hotelRepo.save(hotel);
-        return savedHotel.getId();
+        hotelRepo.save(hotel);
+        return hotel.getId();
     }
 
     @Transactional
-    public void updateHotel(HotelUpdateDto hotelDto, long hotelId) throws AccessDeniedException {
+    public void updateHotel(HotelUpdateDto hotelDto, long hotelId) {
         Optional<Hotel> optionalHotel = hotelRepo.findById(hotelId);
         if (optionalHotel.isEmpty()) {
             throw new HotelNotFoundException(hotelId);
@@ -108,19 +109,19 @@ public class HotelService {
 
             hotelRepo.save(hotel);
         } else {
-            throw new AccessDeniedException("You do not have permission to modify this hotel");
+            throw new NotEnoughPermissionException("You do not have permission to modify this hotel");
         }
     }
 
     @Transactional
-    public void deleteHotel(long hotelId) throws AccessDeniedException {
+    public void deleteHotel(long hotelId) {
         if (hotelRepo.existsById(hotelId)) {
             UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Hotel hotel = hotelRepo.findHotelById(hotelId).get();
             if (Objects.equals(hotel.getOwner().getLogin(), principal.getUsername())) {
                 hotelRepo.deleteById(hotelId);
             } else {
-                throw new AccessDeniedException("You do not have permission to delete this hotel");
+                throw new NotEnoughPermissionException("You do not have permission to delete this hotel");
             }
         } else {
             throw new HotelNotFoundException(hotelId);

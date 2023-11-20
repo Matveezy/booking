@@ -35,7 +35,7 @@ public class OwnerController {
     @PutMapping("/hotel/{id}")
     @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     public ResponseEntity<?> updateHotel(@Validated @RequestBody HotelUpdateDto dto,
-                                         @PathVariable long id) throws AccessDeniedException {
+                                         @PathVariable long id) {
         hotelService.updateHotel(dto, id);
         String response = "Hotel was successfully updated";
         return ResponseEntity.ok(response);
@@ -43,7 +43,7 @@ public class OwnerController {
 
     @DeleteMapping("/hotel/{id}")
     @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
-    public ResponseEntity<?> deleteHotel(@PathVariable long id) throws AccessDeniedException {
+    public ResponseEntity<?> deleteHotel(@PathVariable long id) {
         hotelService.deleteHotel(id);
         String response = "Hotel was successfully deleted";
         return ResponseEntity.ok(response);
@@ -51,7 +51,7 @@ public class OwnerController {
 
     @PostMapping("/room")
     @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
-    public ResponseEntity<?> createRoom(@Validated @RequestBody RoomCreateDto dto) throws AccessDeniedException {
+    public ResponseEntity<?> createRoom(@Validated @RequestBody RoomCreateDto dto) {
         Long createdId = roomService.saveRoom(dto);
         String response = "Created room id=" + createdId;
         return ResponseEntity.ok(response);
@@ -59,7 +59,7 @@ public class OwnerController {
 
     @PutMapping("/room/{id}")
     @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
-    public ResponseEntity<?> updateRoom(@Validated @RequestBody RoomUpdateDto dto, @PathVariable long id) throws AccessDeniedException {
+    public ResponseEntity<?> updateRoom(@Validated @RequestBody RoomUpdateDto dto, @PathVariable long id) {
         roomService.updateRoom(dto, id);
         String response = "Room was successfully updated";
         return ResponseEntity.ok(response);

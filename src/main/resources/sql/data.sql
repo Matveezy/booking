@@ -65,7 +65,7 @@ VALUES ((SELECT id from users where login = 'alex@yandex.ru'), 200),
        ((SELECT id from users where login = 'bob123@yahoo.com'), 400),
        ((SELECT id from users where login = 'kate@gmail.com'), 500),
        ((SELECT id from users where login = 'jane223@gmail.com'), 350),
-       ((SELECT id from users where login = 'ivan@gmail.com'), 1000),
+       ((SELECT id from users where login = 'ivan@gmail.com'), 10000),
        ((SELECT id from users where login = 'alexandr@gmail.com'), 2000);
 
 
