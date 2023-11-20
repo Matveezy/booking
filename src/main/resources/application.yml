@@ -11,8 +11,8 @@ spring:
     show-sql: true
     properties:
       hibernate:
-        format_sql: true
-        hbm2ddl.auto: validate
+        format_sql: false
+        hbm2ddl.auto: none
 
 token:
   secret:

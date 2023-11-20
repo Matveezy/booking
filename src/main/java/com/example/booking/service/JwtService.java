@@ -1,6 +1,5 @@
 package com.example.booking.service;
 
-import com.example.booking.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -10,13 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import java.security.Key;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 @Service
@@ -28,8 +24,6 @@ public class JwtService {
 
     @Value("${token.secret.expiration:1000000}")
     private long jwtExpirationMs;
-
-    private final UserRepository userRepository;
 
     public String extractLogin(String token) {
         return extractClaim(token, (Claims::getSubject));

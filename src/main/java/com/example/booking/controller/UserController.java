@@ -42,12 +42,11 @@ public class UserController {
         return roomService.findRoomsByDates(filter, hotelId, page);
     }
 
-    @PostMapping("/order/{roomId}")
+    @PostMapping("/orders/create")
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<?> bookRoom(@Validated @RequestBody BookRoomDto order, @PathVariable long roomId) {
-        return ordersService.makeOrder(order, roomId)
-                ? ResponseEntity.ok().build()
-                : ResponseEntity.badRequest().build();
+    public ResponseEntity<?> bookRoom(@Validated @RequestBody CreateOrderDto order) {
+        ordersService.makeOrder(order);
+        return ResponseEntity.ok("Room successfully booked!");
     }
 
     @GetMapping("/orders/{userId}")

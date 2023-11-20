@@ -1,22 +1,20 @@
 package com.example.booking.service;
 
 import com.example.booking.entity.*;
+import com.example.booking.exception.NotEnoughPermissionException;
 import com.example.booking.exception.RoomNotFoundException;
+import com.example.booking.mapper.RoomEntityMapper;
 import com.example.booking.mapper.RoomReadMapper;
-import com.example.booking.repository.OrdersRepository;
 import com.example.booking.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.AccessDeniedException;
 import java.time.Instant;
 import java.util.List;
 
 import com.example.booking.dto.*;
-import com.example.booking.exception.HotelNotFoundException;
-import com.example.booking.repository.HotelRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,37 +29,25 @@ public class RoomService {
     public final static int MAX_PAGE_SIZE = 10;
 
     private final RoomRepository roomRepository;
-    private final HotelRepository hotelRepository;
     private final RoomReadMapper roomReadMapper;
-    private final OrdersRepository ordersRepository;
-    private final HotelService hotelService;
+    private final OrdersService ordersService;
+    private final RoomEntityMapper roomEntityMapper;
 
     @Transactional
-    public Long saveRoom(RoomCreateDto roomCreateDto) throws AccessDeniedException {
-        Optional<Hotel> optionalHotel = hotelRepository.findHotelById(roomCreateDto.getHotelId());
-        if (optionalHotel.isEmpty()) {
-            throw new HotelNotFoundException(roomCreateDto.getHotelId());
-        }
-        Hotel hotel = optionalHotel.get();
+    public Long saveRoom(RoomCreateDto roomCreateDto) {
+        Room roomEntityToSave = roomEntityMapper.map(roomCreateDto);
+        Hotel hotel = roomEntityToSave.getHotel();
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
         if (Objects.equals(hotel.getOwner().getLogin(), principal.getUsername())) {
-            Room room = Room.builder()
-                    .hotel(hotel)
-                    .roomClass(roomCreateDto.getRoomClass())
-                    .roomNumber(roomCreateDto.getRoomNumber())
-                    .price(roomCreateDto.getPrice())
-                    .build();
-
-            roomRepository.save(room);
-            return room.getId();
+            roomRepository.save(roomEntityToSave);
+            return roomEntityToSave.getId();
         } else {
-            throw new AccessDeniedException("You do not have permission to create a room in this hotel");
+            throw new NotEnoughPermissionException("You do not have permission to create a room in this hotel");
         }
     }
 
     @Transactional
-    public void updateRoom(RoomUpdateDto roomUpdateDto, long roomId) throws AccessDeniedException {
+    public void updateRoom(RoomUpdateDto roomUpdateDto, long roomId) {
         Optional<Room> optionalRoom = roomRepository.findById(roomId);
         if (optionalRoom.isEmpty()) {
             throw new RoomNotFoundException(roomId);
@@ -76,7 +62,7 @@ public class RoomService {
 
             roomRepository.save(room);
         } else {
-            throw new AccessDeniedException("You do not have permission to modify this room");
+            throw new NotEnoughPermissionException("You do not have permission to modify this room");
         }
     }
 
@@ -89,6 +75,8 @@ public class RoomService {
             if (Objects.equals(hotel.getOwner().getLogin(), principal.getUsername())) {
                 roomRepository.deleteById(roomId);
                 return true;
+            } else {
+                throw new NotEnoughPermissionException("You do not have permission to delete this room");
             }
         }
         return false;
@@ -127,7 +115,7 @@ public class RoomService {
     }
 
     public boolean isRoomFree(RoomInfoDto room, Instant dateIn, Instant dateOut) {
-        return ordersRepository.findOrdersByRoom_Id(room.getId()).stream()
+        return ordersService.findOrdersByRoomId(room.getId()).stream()
                 .filter(o -> datesIntersection(o.getDateIn(), o.getDateOut(), dateIn, dateOut))
                 .toList()
                 .isEmpty();

@@ -1,6 +1,8 @@
 package com.example.booking.service;
 
 import com.example.booking.entity.Order;
+import com.example.booking.exception.EntityNotFoundException;
+import com.example.booking.exception.InsufficientMoneyBalanceException;
 import com.example.booking.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,45 +18,48 @@ public class WalletService {
     private final UserService userService;
 
     @Transactional
-    public boolean transferMoney(long fromUser, long toUser, long amount) {
+    public void transferMoney(long fromUser, long toUser, long amount) {
         var walletFrom = walletRepository.findWalletByUser_Id(fromUser);
-        if (walletFrom.isEmpty()) return false;
+        if (walletFrom.isEmpty())
+            throw new EntityNotFoundException("Can't find user's balance with user id " + fromUser);
         var walletTo = walletRepository.findWalletByUser_Id(toUser);
-        if (walletTo.isEmpty()) return false;
+        if (walletTo.isEmpty()) throw new EntityNotFoundException("Can't find user's balance with user id " + toUser);
+        if (walletFrom.get().getBalance() < amount)
+            throw new InsufficientMoneyBalanceException("User (id : " + fromUser + ") has " +
+                                                        "not enough money for the transfer");
         walletFrom.get().setBalance(walletFrom.get().getBalance() - amount);
         walletTo.get().setBalance(walletTo.get().getBalance() + amount);
 
         walletRepository.save(walletFrom.get());
         walletRepository.save(walletTo.get());
-        return true;
     }
 
 
     @Transactional
-    public boolean bookRoom(Order order) {
+    public void bookRoom(Order order) {
         var fromUser = order.getUser().getId();
         var toUser = order.getHotel().getOwner().getId();
         var days = Duration.between(order.getDateIn(), order.getDateOut()).getSeconds() / (60 * 60 * 24);
         var amount = order.getRoom().getPrice() * days;
-        return transferMoney(fromUser, toUser, amount);
+        transferMoney(fromUser, toUser, amount);
     }
 
 
     @Transactional
-    public boolean cancelRoom(Order order) {
+    public void cancelRoom(Order order) {
         var toUser = order.getUser().getId();
         var fromUser = order.getHotel().getOwner().getId();
         var days = Duration.between(order.getDateIn(), order.getDateOut()).getSeconds() / (60 * 60 * 24);
         var amount = order.getRoom().getPrice() * days;
-        return transferMoney(fromUser, toUser, amount);
+        transferMoney(fromUser, toUser, amount);
     }
 
     public long getUserBalance(long id) {
         var user = userService.findUserById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User with id " + id + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
 
         var wallet = walletRepository.findWalletByUser_Id(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Wallet with user id " + user.getId() + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet with user id " + user.getId() + " not found"));
 
         return wallet.getBalance();
     }

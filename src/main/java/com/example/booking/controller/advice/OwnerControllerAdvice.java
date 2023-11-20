@@ -2,6 +2,7 @@ package com.example.booking.controller.advice;
 
 import com.example.booking.controller.OwnerController;
 import com.example.booking.exception.EntityNotFoundException;
+import com.example.booking.exception.NotEnoughPermissionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,9 +26,9 @@ public class OwnerControllerAdvice {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
+    @ExceptionHandler(NotEnoughPermissionException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ResponseEntity<String> handleAccessDenied(AccessDeniedException e) {
+    public ResponseEntity<String> handleAccessDenied(NotEnoughPermissionException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 }

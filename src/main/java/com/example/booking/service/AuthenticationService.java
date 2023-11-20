@@ -3,49 +3,50 @@ package com.example.booking.service;
 import com.example.booking.dto.AuthenticationRequest;
 import com.example.booking.dto.AuthenticationResponse;
 import com.example.booking.dto.RegisterRequest;
-import com.example.booking.entity.Role;
+import com.example.booking.dto.UserReadDto;
 import com.example.booking.entity.User;
-import com.example.booking.mapper.UserCreateMapper;
-import com.example.booking.repository.UserRepository;
+import com.example.booking.exception.EntityNotFoundException;
+import com.example.booking.mapper.UserEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuthenticationService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final JwtService jwtService;
-    private final UserCreateMapper userCreateMapper;
     private final AuthenticationManager authenticationManager;
+    private final UserEntityMapper userEntityMapper;
 
     @Transactional
-    public AuthenticationResponse register(RegisterRequest request) {
-        User userEntityToSave = userCreateMapper.map(request);
-        userRepository.save(userEntityToSave);
-        String jwt = jwtService.generateToken(userEntityToSave);
-        return AuthenticationResponse.builder()
+    public Optional<AuthenticationResponse> register(RegisterRequest request) {
+        long createdUserId = userService.createUser(request);
+        User userEntity = userEntityMapper.map(UserReadDto.builder().id(createdUserId).build());
+        String jwt = jwtService.generateToken(userEntity);
+        return Optional.of(AuthenticationResponse.builder()
                 .token(jwt)
-                .build();
+                .build());
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public Optional<AuthenticationResponse> authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getLogin(), request.getPass()
                 )
         );
-        User user = userRepository.findByLogin(request.getLogin())
-                .orElseThrow(() -> new UsernameNotFoundException("Failed to retrieve user"));
-        String jwt = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()
+        User userEntity = userService.findByLogin(request.getLogin())
+                .map(userEntityMapper::map)
+                .orElseThrow(() -> new EntityNotFoundException("Failed to retrieve user"));
+        String jwt = jwtService.generateToken(userEntity);
+        return Optional.of(AuthenticationResponse.builder()
                 .token(jwt)
-                .build();
+                .build());
     }
 }

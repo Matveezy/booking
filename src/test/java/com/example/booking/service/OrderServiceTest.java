@@ -1,16 +1,17 @@
 package com.example.booking.service;
 
-import com.example.booking.dto.BookRoomDto;
-import com.example.booking.dto.OrderReadDto;
-import com.example.booking.dto.RoomInfoDto;
-import com.example.booking.dto.UserReadDto;
+import com.example.booking.dto.*;
+import com.example.booking.exception.InsufficientMoneyBalanceException;
 import com.example.booking.repository.OrdersRepository;
 import integration.IntegrationTestBase;
 import integration.annotation.IT;
 import integration.annotation.WithMockCustomUser;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,16 +31,18 @@ public class OrderServiceTest extends IntegrationTestBase {
     @Test
     @WithMockCustomUser(username = "ivan@gmail.com")
     public void makeOrderTest() {
-        var userOpt = userService.findUserByName("ivan@gmail.com");
+        var userOpt = userService.findByLogin("ivan@gmail.com");
         assertThat(userOpt).isPresent();
 
         var roomOptional = roomService.findRoom(1);
         assertTrue(roomOptional.isPresent());
         RoomInfoDto room = roomOptional.get();
         var userId = userOpt.get().getId();
-        var bookRoomDto = BookRoomDto.builder()
+        long twoDaysSecond = Duration.of(2, ChronoUnit.DAYS).toSeconds();
+        var createOrderDto = CreateOrderDto.builder()
+                .roomId(room.getId())
                 .dateIn(Instant.ofEpochSecond(10000))
-                .dateOut(Instant.ofEpochSecond(200000))
+                .dateOut(Instant.ofEpochSecond(10000 + twoDaysSecond))
                 .userId(userId)
                 .build();
 
@@ -48,12 +51,12 @@ public class OrderServiceTest extends IntegrationTestBase {
         assertTrue(hotelOwner.isPresent());
         var balanceOwnerBefore = walletService.getUserBalance(hotelOwner.get().getId());
 
-        ordersService.makeOrder(bookRoomDto, room.getId());
+        ordersService.makeOrder(createOrderDto);
 
         assertThat(ordersService.showOrders(userId))
                 .contains(OrderReadDto.builder()
                         .dateIn(Instant.ofEpochSecond(10000))
-                        .dateOut(Instant.ofEpochSecond(200000))
+                        .dateOut(Instant.ofEpochSecond(10000 + twoDaysSecond))
                         .room(roomService.findRoom(room.getId()).orElse(null))
                         .hotel(hotelService.findHotelInfo(room.getHotelInfoDto().getId()).orElse(null))
                         .userReadDto(userService.findUserById(userId).orElse(null))
@@ -78,17 +81,18 @@ public class OrderServiceTest extends IntegrationTestBase {
     @Test
     @WithMockCustomUser(username = "ivan@gmail.com")
     public void cancelOrderTest() {
-        var userOpt = userService.findUserByName("ivan@gmail.com");
+        var userOpt = userService.findByLogin("ivan@gmail.com"); // balance 10000
         assertThat(userOpt).isPresent();
 
-        var room = roomService.findRoom(1);
+        var room = roomService.findRoom(2); // price 2500
         assertTrue(room.isPresent());
         assertThat(room).isNotNull();
-
+        long twoDaysSeconds = Duration.of(2, ChronoUnit.DAYS).toSeconds();
         var userId = userOpt.get().getId();
-        var bookRoomDto = BookRoomDto.builder()
+        var createOrderDto = CreateOrderDto.builder()
+                .roomId(room.get().getId())
                 .dateIn(Instant.ofEpochSecond(10000))
-                .dateOut(Instant.ofEpochSecond(200000))
+                .dateOut(Instant.ofEpochSecond(10000 + twoDaysSeconds))
                 .userId(userId)
                 .build();
 
@@ -97,7 +101,7 @@ public class OrderServiceTest extends IntegrationTestBase {
         assertTrue(hotelOwner.isPresent());
         var balanceOwnerBefore = walletService.getUserBalance(hotelOwner.get().getId());
 
-        ordersService.makeOrder(bookRoomDto, room.get().getId());
+        ordersService.makeOrder(createOrderDto);
 
         var order = ordersRepository.findOrdersByUser_Id(userId).get(0);
         ordersService.cancelOrder(order.getId());
@@ -109,5 +113,29 @@ public class OrderServiceTest extends IntegrationTestBase {
 
         assertThat(balanceUserBefore).isEqualTo(balanceUserAfter);
         assertThat(balanceOwnerBefore).isEqualTo(balanceOwnerAfter);
+    }
+
+    @Test
+    @WithMockCustomUser(username = "ivan@gmail.com")
+    public void makeOrderNotEnoughMoneyTest() {
+        var userOpt = userService.findByLogin("ivan@gmail.com"); // balance 10000
+        assertThat(userOpt).isPresent();
+
+        var room = roomService.findRoom(1); // price 4000
+        assertTrue(room.isPresent());
+        assertThat(room).isNotNull();
+        long threeDaysSeconds = Duration.of(3, ChronoUnit.DAYS).toSeconds();
+
+        var userId = userOpt.get().getId();
+        var createOrderDto = CreateOrderDto.builder()
+                .roomId(room.get().getId())
+                .dateIn(Instant.ofEpochSecond(10000))
+                .dateOut(Instant.ofEpochSecond(10000 + threeDaysSeconds))
+                .userId(userId)
+                .build();
+
+        Optional<UserReadDto> hotelOwner = hotelService.getHotelOwner(room.get().getHotelInfoDto().getId());
+        assertTrue(hotelOwner.isPresent());
+        assertThrows(InsufficientMoneyBalanceException.class, () -> ordersService.makeOrder(createOrderDto));
     }
 }
