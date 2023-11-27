@@ -19,5 +19,4 @@ public class AdminService {
                 .map(userReadDto -> userService.updateRole(userPermissionUpdateDto.getRole(), userPermissionUpdateDto.getLogin()))
                 .orElseThrow((() -> new EntityNotFoundException("Can't retrieve user with login :" + userPermissionUpdateDto.getLogin())));
     }
-
 }
