@@ -1,4 +1,6 @@
-FROM openjdk:17
-ADD target/booking.jar booking.jar
-ENTRYPOINT ["java", "-jar","booking.jar"]
-EXPOSE 8080
+FROM maven:3.8.5-openjdk-17
+WORKDIR /booking
+COPY . .
+RUN mvn clean install -DskipTests
+
+CMD mvn spring-boot:run
