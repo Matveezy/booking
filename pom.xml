@@ -20,15 +20,21 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <modules>
-        <module>common</module>
-        <module>user</module>
-        <module>owner</module>
-        <module>admin</module>
-        <module>config</module>
-        <module>files</module>
-        <module>alerts</module>
-    </modules>
+    <profiles>
+        <profile>
+            <id>booking</id>
+            <modules>
+                <module>common</module>
+                <module>user</module>
+                <module>owner</module>
+                <module>admin</module>
+                <module>config</module>
+                <module>files</module>
+                <module>alerts</module>
+            </modules>
+        </profile>
+    </profiles>
+
 
     <build>
         <pluginManagement>
