@@ -5,14 +5,12 @@ stages:
   - test
   - deploy
 
-#build:
-#  image: maven:3.8.5-openjdk-17
-#  stage: build
-#  script:
-#    - mvn install -DskipTests
+build:
+  stage: build
+  script:
+    - mvn install -DskipTests
 
 test:
-  image: maven:3.8.5-openjdk-17
   stage: test
   script:
     - mvn test
