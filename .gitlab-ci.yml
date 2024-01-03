@@ -1,0 +1,27 @@
+image: docker:latest
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  image: maven:3.8.5-openjdk-17
+  stage: build
+  script:
+    - mvn install
+
+test:
+  image: maven:3.8.5-openjdk-17
+  stage: test
+  script:
+    - mvn install
+
+
+deploy:
+  stage: deploy
+  only:
+    refs:
+      - master
+  script:
+    - bash start.sh
