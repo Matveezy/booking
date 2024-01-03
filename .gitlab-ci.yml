@@ -1,21 +1,40 @@
+image: docker:latest
+variables:
+  DOCKER_TLS_CERTDIR: ""
+
 stages:
   - build
   - test
   - deploy
 
 build:
+  image: maven:3.8.5-openjdk-17
   stage: build
   script:
-    - mvn install -DskipTests
+    - ./mvnw install -DskipTests
+
 
 test:
+  image: docker/compose:debian-1.29.2
   stage: test
+  services:
+    - name: docker:dind
+      command: ["--tls=false"]
+  before_script:
+    - apt-get update && apt install libc6-x32 curl wget -y
+    - wget https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.tar.gz
+    - tar -xvf jdk-17_linux-x64_bin.tar.gz
+    - mv jdk-17.0.* /opt/jdk
+    - export JAVA_HOME=/opt/jdk
   script:
-    - mvn test
+    - ./mvnw test
 
 
 deploy:
   stage: deploy
+  services:
+    - name: docker:dind
+      command: ["--tls=false"]
   only:
     refs:
       - master
