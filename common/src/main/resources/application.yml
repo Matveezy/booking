@@ -18,3 +18,6 @@ token:
   secret:
     key: z8MUdQfvoH4m3teWEkN/QizSW3XPlZ/zyJeQvQ3YOXp/09Iwl2TVsD+pi1Azd57M
     expiration: 123456789
+
+server:
+  port: 8080
