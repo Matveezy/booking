@@ -1,6 +1,7 @@
 FROM maven:3.8.5-openjdk-17
 WORKDIR /booking
 COPY . .
-RUN mvn clean install -DskipTests
+ARG service
+RUN mvn clean install -DskipTests -pl ${service} -amd
 
-CMD mvn spring-boot:run
+CMD java -jar ${service}/target/${service}-1.0.jar

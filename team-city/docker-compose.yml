@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  teamcity:
+    image: jetbrains/teamcity-server
+    user: root
+    ports:
+      - "8111:8111"
+    restart: always
+    volumes:
+      - ~/teamcity/data:/data/teamcity_server/datadir
+      - ~/teamcity/logs:/opt/teamcity/logs
+
+  teamcity-agent-1:
+    image: jetbrains/teamcity-agent
+    user: root
+    depends_on:
+      - teamcity
+    restart: always
+    volumes:
+      - ~/teamcity/agent-1:/data/teamcity_agent/conf
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - SERVER_URL=teamcity:8111
+      - DOCKER_IN_DOCKER=start
+
+  teamcity-agent-2:
+    image: jetbrains/teamcity-agent
+    user: root
+    depends_on:
+      - teamcity
+    volumes:
+      - ~/teamcity/agent-2:/data/teamcity_agent/conf
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - SERVER_URL=teamcity:8111
+      - DOCKER_IN_DOCKER=start
