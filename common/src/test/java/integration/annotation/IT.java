@@ -1,6 +1,6 @@
 package integration.annotation;
 
-import booking.BookingApplication;
+import booking.common.BookingApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;

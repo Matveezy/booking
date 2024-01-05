@@ -10,8 +10,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <groupId>booking</groupId>
     <artifactId>common</artifactId>
     <version>1.0</version>
+
     <name>common</name>
     <description>common</description>
     <properties>
