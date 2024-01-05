@@ -1,6 +1,6 @@
 package integration.security;
 
-import booking.service.UserService;
+import booking.common.service.UserService;
 import integration.annotation.WithMockCustomUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
