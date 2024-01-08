@@ -22,6 +22,7 @@
         <module>files</module>
         <module>alerts</module>
         <module>gateway</module>
+        <module>eureka</module>
     </modules>
 
 
