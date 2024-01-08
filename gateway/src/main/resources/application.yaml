@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: auth-service-routes
+            uri: ${AUTH_SERVICE_URI:http://localhost:8081}
+            predicates:
+              - Path=/auth/**
+            filters:
+              -
