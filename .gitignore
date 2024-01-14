@@ -33,3 +33,4 @@ build/
 .vscode/
 /pgdata/
 /mongodata/
+/secrets.env
