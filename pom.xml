@@ -15,16 +15,18 @@
 
     <modules>
         <module>common</module>
+
+        <module>eureka</module>
+        <module>config</module>
+        <module>security</module>
         <module>user</module>
         <module>hotel</module>
-        <module>admin</module>
-        <module>config</module>
+        <module>wallet</module>
+
         <module>files</module>
         <module>alerts</module>
+
         <module>gateway</module>
-        <module>eureka</module>
-        <module>security</module>
-        <module>wallet</module>
     </modules>
 
 
