@@ -171,12 +171,12 @@ services:
       - USER=${MONGO_USER}
       - PASS=${MONGO_PASS}
 
-  getaway:
+  gateway:
     build:
       context: .
       args:
-        service: getaway
-    container_name: getaway
+        service: gateway
+    container_name: gateway
     ports:
       - "8098:8098"
     depends_on:
