@@ -3,10 +3,11 @@ package booking.wallet.service;
 import booking.wallet.dto.MoneyTransferResponse;
 import booking.wallet.entity.Wallet;
 import booking.wallet.repository.WalletRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.expression.spel.ast.OpInc;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -19,49 +20,49 @@ public class WalletService {
     private final Long DEFAULT_CREATED_USER_BALANCE = 0L;
 
     @Transactional
-    public MoneyTransferResponse transferMoney(long fromUserId, long toUserId, long amount) {
-        Optional<Wallet> fromUserWalletOptional = walletRepository.findWalletByUserId(fromUserId);
-        Optional<Wallet> toUserWalletOptional = walletRepository.findWalletByUserId(toUserId);
-        if (fromUserWalletOptional.isEmpty() || toUserWalletOptional.isEmpty()) {
-            return MoneyTransferResponse.builder()
-                    .isCompleted(false)
-                    .cause("No wallet entity")
-                    .build();
-        }
-        Wallet fromUserWallet = fromUserWalletOptional.get();
-        Wallet toUserWallet = toUserWalletOptional.get();
-        if (fromUserWallet.getBalance() < amount) {
-            return MoneyTransferResponse.builder()
-                    .isCompleted(false)
-                    .cause("Not enough money to order")
-                    .build();
-        }
-
-        fromUserWallet.setBalance(fromUserWallet.getBalance() - amount);
-        toUserWallet.setBalance(toUserWallet.getBalance() + amount);
-        walletRepository.save(fromUserWallet);
-        walletRepository.save(toUserWallet);
-        return MoneyTransferResponse.builder()
-                .isCompleted(true)
-                .build();
+    public Mono<MoneyTransferResponse> transferMoney(long fromUserId, long toUserId, long amount) {
+        Mono<Wallet> walletFromUser = walletRepository.findWalletByUserid(fromUserId);
+        Mono<Wallet> walletToUser = walletRepository.findWalletByUserid(toUserId);
+        return walletFromUser.zipWith(walletToUser)
+                .flatMap(balances -> {
+                    Wallet fromUserWallet = balances.getT1();
+                    Wallet toUserWallet = balances.getT2();
+                    if (fromUserWallet.getBalance() < amount) {
+                        return Mono.just(MoneyTransferResponse.builder()
+                                .isCompleted(false)
+                                .cause("Not enough money to order")
+                                .build());
+                    }
+                    fromUserWallet.setBalance(fromUserWallet.getBalance() - amount);
+                    toUserWallet.setBalance(toUserWallet.getBalance() + amount);
+                    Mono<Wallet> updateFromUserBalance = walletRepository.save(fromUserWallet);
+                    Mono<Wallet> updateToUserBalance = walletRepository.save(toUserWallet);
+                    return Mono.when(updateToUserBalance, updateFromUserBalance)
+                            .thenReturn(MoneyTransferResponse.builder()
+                                    .isCompleted(true)
+                                    .build());
+                });
     }
 
     @Transactional
-    public void createWallet(Long userId) {
+    public Mono<Wallet> createWallet(Long userId) {
         Wallet walletEntity = Wallet.builder()
                 .balance(DEFAULT_CREATED_USER_BALANCE)
-                .userId(userId)
+                .userid(userId)
                 .build();
-        walletRepository.save(walletEntity);
+        return walletRepository.save(walletEntity);
     }
 
     @Transactional
-    public Long updateBalance(Long userId, long amount) {
-        Optional<Wallet> walletByUserId = walletRepository.findWalletByUserId(userId);
-        return walletByUserId.map(wallet -> {
-            wallet.setBalance(wallet.getBalance() + amount);
-            walletRepository.save(wallet);
-            return wallet.getBalance();
-        }).orElseThrow(() -> new EntityNotFoundException());
+    public Mono<Wallet> updateBalance(Long userId, long amount) {
+        return walletRepository.findWalletByUserid(userId)
+                .map(Optional::of).defaultIfEmpty(Optional.empty())
+                .flatMap(optionalWallet -> {
+                    if (optionalWallet.isPresent()) {
+                        optionalWallet.get().setBalance(optionalWallet.get().getBalance() + amount);
+                        return walletRepository.save(optionalWallet.get());
+                    }
+                    return Mono.empty();
+                });
     }
 }
