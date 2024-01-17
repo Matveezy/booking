@@ -25,6 +25,9 @@ services:
       args:
         service: config
     container_name: config
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "8888:8888"
     healthcheck:
