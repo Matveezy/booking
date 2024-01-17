@@ -10,12 +10,13 @@ import booking.user.mapper.CreateUserByAdminMapper;
 import booking.user.mapper.RegisterRequestMapper;
 import booking.user.mapper.UserReadMapper;
 import booking.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 @RequiredArgsConstructor
@@ -29,39 +30,40 @@ public class UserService {
     private final WalletServiceClient walletServiceClient;
 
     @Transactional
-    public UserReadDto createUser(RegisterRequest registerRequest) {
+    public Mono<UserReadDto> createUser(RegisterRequest registerRequest) {
         User userEntity = registerRequestMapper.mapToEntity(registerRequest);
-        userRepository.save(userEntity);
-        walletServiceClient.createWallet(userEntity.getId());
-        return userReadMapper.mapToDto(userEntity);
+        return Mono.fromCallable(() -> userRepository.save(userEntity))
+                .doOnNext(user -> walletServiceClient.createWallet(user.getId()))
+                .map(userReadMapper::mapToDto)
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Transactional
-    public UserReadDto createUser(CreateUserByAdminDto createUserByAdminDto) {
+    public Mono<UserReadDto> createUser(CreateUserByAdminDto createUserByAdminDto) {
         User userEntity = createUserByAdminMapper.mapToEntity(createUserByAdminDto);
-        userRepository.save(userEntity);
-        walletServiceClient.createWallet(userEntity.getId());
-        return userReadMapper.mapToDto(userEntity);
+        return Mono.fromCallable(() -> userRepository.save(userEntity))
+                .doOnNext(user -> walletServiceClient.createWallet(user.getId()))
+                .map(userReadMapper::mapToDto)
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Transactional
-    public UserReadDto updateUser(UpdateUserDto updateUserDto) {
-        Optional<User> userEntity = userRepository.findByLogin(updateUserDto.getLogin());
-        return userEntity.map(user -> {
+    public Mono<UserReadDto> updateUser(UpdateUserDto updateUserDto) {
+        return Mono.fromCallable(() -> userRepository.findByLogin(updateUserDto.getLogin()))
+                .switchIfEmpty(Mono.error(new UsernameNotFoundException("User with login : " + updateUserDto.getLogin() + "is not found!")))
+                .flatMap(user -> {
                     user.setRole(updateUserDto.getRole());
-                    userRepository.save(user);
-                    return userReadMapper.mapToDto(user);
-                }
-        ).orElseThrow(() -> new UsernameNotFoundException("User with login : " + updateUserDto.getLogin() + "is not found!"));
+                    return Mono.just(user);
+                })
+                .doOnNext(userRepository::save)
+                .map(userReadMapper::mapToDto)
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
-    public Optional<UserReadDto> findUserByLogin(String login) {
-        return userRepository.findByLogin(login)
-                .map(userReadMapper::mapToDto);
-    }
-
-    public Optional<UserReadDto> findUserById(Long id) {
-        return userRepository.findById(id)
-                .map(userReadMapper::mapToDto);
+    public Mono<UserReadDto> findUserByLogin(String login) {
+        return Mono.fromCallable(() -> userRepository.findByLogin(login))
+                .switchIfEmpty(Mono.error(new EntityNotFoundException()))
+                .map(userReadMapper::mapToDto)
+                .subscribeOn(Schedulers.boundedElastic());
     }
 }
