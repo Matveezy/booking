@@ -26,7 +26,12 @@ services:
         service: config
     container_name: config
     ports:
-      - "8090:8090"
+      - "8888:8888"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   eureka:
     build:
@@ -35,12 +40,18 @@ services:
         service: eureka
     container_name: eureka
     ports:
-      - "8091:8091"
+      - "8761:8761"
     depends_on:
-      - config
+      config:
+        condition: service_healthy
     environment:
+      - CONFIGSERVER_URI=http://config:8888
       - EUREKA_HOST=eureka
-      - EUREKA_PORT=8091
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   security:
     build:
@@ -48,16 +59,14 @@ services:
       args:
         service: security
     container_name: security
-    ports:
-      - "8092:8092"
     depends_on:
       eureka:
-        condition: service_started
+        condition: service_healthy
       db:
         condition: service_healthy
     environment:
+      - CONFIGSERVER_URI=http://config:8888
       - EUREKA_HOST=eureka
-      - EUREKA_PORT=8091
       - HOST=db
       - PORT=${PG_PORT}
       - NAME=${POSTGRES_DB}
@@ -70,18 +79,16 @@ services:
       args:
         service: user
     container_name: user
-    ports:
-      - "8093:8093"
     depends_on:
-      security:
-        condition: service_started
+      eureka:
+        condition: service_healthy
       db:
         condition: service_healthy
       kafka:
         condition: service_started
     environment:
+      - CONFIGSERVER_URI=http://config:8888
       - EUREKA_HOST=eureka
-      - EUREKA_PORT=8091
       - HOST=db
       - PORT=${PG_PORT}
       - NAME=${POSTGRES_DB}
@@ -96,16 +103,14 @@ services:
       args:
         service: wallet
     container_name: wallet
-    ports:
-      - "8094:8094"
     depends_on:
-      security:
-        condition: service_started
+      eureka:
+        condition: service_healthy
       db:
         condition: service_healthy
     environment:
+      - CONFIGSERVER_URI=http://config:8888
       - EUREKA_HOST=eureka
-      - EUREKA_PORT=8091
       - HOST=db
       - PORT=${PG_PORT}
       - NAME=${POSTGRES_DB}
@@ -118,16 +123,14 @@ services:
       args:
         service: hotel
     container_name: hotel
-    ports:
-      - "8095:8095"
     depends_on:
-      security:
-        condition: service_started
+      eureka:
+        condition: service_healthy
       db:
         condition: service_healthy
     environment:
+      - CONFIGSERVER_URI=http://config:8888
       - EUREKA_HOST=eureka
-      - EUREKA_PORT=8091
       - HOST=db
       - PORT=${PG_PORT}
       - NAME=${POSTGRES_DB}
@@ -140,13 +143,14 @@ services:
       args:
         service: alerts
     container_name: alerts
-    ports:
-      - "8096:8096"
     depends_on:
-      - kafka
+      eureka:
+        condition: service_healthy
+      kafka:
+        condition: service_started
     environment:
+      - CONFIGSERVER_URI=http://config:8888
       - EUREKA_HOST=eureka
-      - EUREKA_PORT=8091
       - MAIL_LOGIN=${MAIL_LOGIN}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - KAFKA_HOST=${KAFKA_HOST}
@@ -158,13 +162,14 @@ services:
       args:
         service: files
     container_name: files
-    ports:
-      - "8097:8097"
     depends_on:
-      - mongo
+      eureka:
+        condition: service_healthy
+      mongo:
+        condition: service_started
     environment:
+      - CONFIGSERVER_URI=http://config:8888
       - EUREKA_HOST=eureka
-      - EUREKA_PORT=8091
       - HOST=mongo
       - PORT=${MONGO_PORT}
       - NAME=${MONGO_DB}
@@ -178,17 +183,13 @@ services:
         service: gateway
     container_name: gateway
     ports:
-      - "8098:8098"
+      - "8765:8765"
     depends_on:
-      - mongo
+      eureka:
+        condition: service_healthy
     environment:
+      - CONFIGSERVER_URI=http://config:8888
       - EUREKA_HOST=eureka
-      - EUREKA_PORT=8091
-      - HOST=mongo
-      - PORT=${MONGO_PORT}
-      - NAME=${MONGO_DB}
-      - USER=${MONGO_USER}
-      - PASS=${MONGO_PASS}
 
   db:
     image: postgres:14
@@ -208,8 +209,6 @@ services:
       timeout: 1s
       retries: 10
     restart: unless-stopped
-
-
 
   mongo:
     image: mongo
