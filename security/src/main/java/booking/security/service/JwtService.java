@@ -20,7 +20,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class JwtService {
 
-    @Value("${token.secret.key:default_secret_key}")
+    @Value("${token.secret.key:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQSflKxwRJSMeKKF2QT4fwpMeJf36POk6yJVadQssw5c}")
     private String jwtSecret;
 
     @Value("${token.secret.expiration:1000000}")
