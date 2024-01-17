@@ -1,5 +1,6 @@
 package booking.wallet.controller;
 
+import booking.wallet.dto.UpdateBalanceRequest;
 import booking.wallet.service.WalletService;
 import booking.wallet.dto.MoneyTransferRequest;
 import booking.wallet.dto.MoneyTransferResponse;
@@ -19,12 +20,18 @@ public class WalletController {
                 moneyTransferRequest.getFromUserId(),
                 moneyTransferRequest.getToUserId(),
                 moneyTransferRequest.getAmount()
-        ));
+        ).block());
     }
 
     @PostMapping("/wallets")
     public ResponseEntity<?> createWallet(@RequestParam Long userId) {
-        walletService.createWallet(userId);
+        walletService.createWallet(userId).block();
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/balance")
+    public ResponseEntity<?> updateBalance(@RequestBody UpdateBalanceRequest updateBalanceRequest) {
+        walletService.updateBalance(updateBalanceRequest.getUserId(), updateBalanceRequest.getAmount()).block();
         return ResponseEntity.ok().build();
     }
 }
