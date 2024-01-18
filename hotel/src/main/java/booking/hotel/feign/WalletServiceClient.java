@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "WALLET-SERVICE")
+@FeignClient(name = "wallet")
 public interface WalletServiceClient {
 
     @PutMapping("/transfer")

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "WALLET-SERVICE")
+@FeignClient(name = "wallet")
 public interface WalletServiceClient {
 
     @PostMapping("/wallets")
