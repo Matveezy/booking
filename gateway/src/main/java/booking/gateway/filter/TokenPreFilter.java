@@ -31,7 +31,7 @@ public class TokenPreFilter extends AbstractGatewayFilterFactory<TokenPreFilter.
                 }
                 String bearerToken = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
                 return webClientBuilder.build().get()
-                        .uri("http://security-service/auth/validate")
+                        .uri("http://security/auth/validate")
                         .header(HttpHeaders.AUTHORIZATION, bearerToken)
                         .retrieve()
                         .bodyToMono(ValidateTokenResponse.class)
