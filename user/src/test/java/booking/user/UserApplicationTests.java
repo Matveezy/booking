@@ -65,7 +65,6 @@ class UserApplicationTests {
     @WithAnonymousUser
     void createUser_success() throws Exception {
         List<User> allUsers = userRepository.findAll();
-        allUsers.forEach(System.out::println);
         assertEquals(3, allUsers.size());
         mockMvc.perform(post("/users")
                 .content(asJsonString(registerRequest()))
@@ -79,7 +78,6 @@ class UserApplicationTests {
     void createUserByAdmin_loggedByUser_receivesForbiddenHttpStatus() throws Exception {
         List<User> allUsers = userRepository.findAll();
         assertEquals(3, allUsers.size());
-        allUsers.forEach(System.out::println);
         mockMvc.perform(post("/admin")
                         .content(asJsonString(adminRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -93,7 +91,6 @@ class UserApplicationTests {
     void createUserByAdmin_loggedByOwner_receivesForbiddenHttpStatus() throws Exception {
         List<User> allUsers = userRepository.findAll();
         assertEquals(3, allUsers.size());
-        allUsers.forEach(System.out::println);
         mockMvc.perform(post("/admin")
                         .content(asJsonString(adminRequest()))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -106,7 +103,6 @@ class UserApplicationTests {
     @WithMockCustomUser(username = ADMIN_LOGIN)
     void createUserByAdmin_loggedByOwner_success() throws Exception {
         List<User> allUsers = userRepository.findAll();
-        allUsers.forEach(System.out::println);
         mockMvc.perform(post("/admin")
                 .content(asJsonString(adminRequest()))
                 .contentType(MediaType.APPLICATION_JSON));
