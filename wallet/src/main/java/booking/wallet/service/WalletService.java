@@ -2,14 +2,12 @@ package booking.wallet.service;
 
 import booking.wallet.dto.MoneyTransferResponse;
 import booking.wallet.entity.Wallet;
+import booking.wallet.exception.EntityNotFoundException;
 import booking.wallet.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.expression.spel.ast.OpInc;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -56,13 +54,10 @@ public class WalletService {
     @Transactional
     public Mono<Wallet> updateBalance(Long userId, long amount) {
         return walletRepository.findWalletByUserid(userId)
-                .map(Optional::of).defaultIfEmpty(Optional.empty())
-                .flatMap(optionalWallet -> {
-                    if (optionalWallet.isPresent()) {
-                        optionalWallet.get().setBalance(optionalWallet.get().getBalance() + amount);
-                        return walletRepository.save(optionalWallet.get());
-                    }
-                    return Mono.empty();
+                .switchIfEmpty(Mono.error(new EntityNotFoundException("User with id : " + userId + " is not found")))
+                .flatMap(wallet -> {
+                    wallet.setBalance(wallet.getBalance() + amount);
+                    return walletRepository.save(wallet);
                 });
     }
 }
