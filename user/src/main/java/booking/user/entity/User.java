@@ -22,19 +22,20 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String name;
 
-    @Column
+    @Column(unique = true, nullable = false)
     private String login;
 
-    @Column
+    @Column(nullable = false)
     private String pass;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
-    @Column(name = "date0fbirth", nullable = false)
+    @Column(name = "date_of_birth")
     private Instant dateOfBirth;
 
 }
