@@ -1,9 +1,6 @@
 package booking.hotel.service;
 
-import booking.hotel.dto.MoneyTransferRequest;
-import booking.hotel.dto.MoneyTransferResponse;
-import booking.hotel.dto.OrderCreateDto;
-import booking.hotel.dto.OrderInfoDto;
+import booking.hotel.dto.*;
 import booking.hotel.entity.Order;
 import booking.hotel.entity.Room;
 import booking.hotel.exception.FailedOrderException;
@@ -13,6 +10,7 @@ import booking.hotel.repo.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
@@ -28,12 +26,17 @@ public class OrderService {
     private final OrderReadMapper orderReadMapper;
     private final RoomService roomService;
     private final WalletServiceClient walletServiceClient;
+    private final UserService userService;
 
-    public OrderService(OrderRepository orderRepository, OrderReadMapper orderReadMapper, @Lazy RoomService roomService, WalletServiceClient walletServiceClient) {
+    private final KafkaTemplate<Long, OrderInfoAlertDto> kafkaTemplate;
+
+    public OrderService(OrderRepository orderRepository, OrderReadMapper orderReadMapper, @Lazy RoomService roomService, WalletServiceClient walletServiceClient, UserService userService, KafkaTemplate<Long, OrderInfoAlertDto> kafkaTemplate) {
         this.orderRepository = orderRepository;
         this.orderReadMapper = orderReadMapper;
         this.roomService = roomService;
         this.walletServiceClient = walletServiceClient;
+        this.userService = userService;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Transactional
@@ -59,6 +62,9 @@ public class OrderService {
                     .createdAt(Instant.now())
                     .build();
             orderRepository.save(orderEntityToSave);
+
+            alertOrderCreated(userId, orderEntityToSave);
+
             return orderReadMapper.mapToDto(orderEntityToSave);
         } else throw new FailedOrderException("Room is not free");
     }
@@ -67,5 +73,26 @@ public class OrderService {
         return orderRepository.findOrdersByRoomId(roomId).stream()
                 .map(orderReadMapper::mapToDto)
                 .toList();
+    }
+
+    public void alertOrderCreated(long userId, Order order) {
+        var user = userService.findById(userId);
+        var dto = OrderInfoAlertDto.builder()
+                .user(UserInfoAlertDto.builder()
+                                .login(user.getLogin())
+                                .name(user.getName())
+                                .build())
+                .hotel(HotelInfoAlertDto.builder()
+                        .city(order.getHotel().getCity())
+                        .name(order.getHotel().getName())
+                        .build())
+                .dateIn(order.getDateIn())
+                .dateOut(order.getDateOut())
+                .build();
+        alertOrderCreated(dto);
+    }
+
+    public void alertOrderCreated(OrderInfoAlertDto order) {
+        kafkaTemplate.send("alerts", order);
     }
 }

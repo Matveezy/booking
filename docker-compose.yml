@@ -97,8 +97,6 @@ services:
       - NAME=${POSTGRES_DB}
       - USER=${POSTGRES_USER}
       - PASS=${POSTGRES_PASSWORD}
-      - KAFKA_HOST=${KAFKA_HOST}
-      - KAFKA_PORT=${KAFKA_PORT}
 
   wallet:
     build:
@@ -139,6 +137,8 @@ services:
       - NAME=${POSTGRES_DB}
       - USER=${POSTGRES_USER}
       - PASS=${POSTGRES_PASSWORD}
+      - KAFKA_HOST=${KAFKA_HOST}
+      - KAFKA_PORT=${KAFKA_PORT}
 
   alerts:
     build:
