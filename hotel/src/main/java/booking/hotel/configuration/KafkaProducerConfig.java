@@ -1,6 +1,6 @@
-package booking.user.config;
+package booking.hotel.configuration;
 
-import booking.user.dto.OrderInfoDto;
+import booking.hotel.dto.OrderInfoAlertDto;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,13 +39,13 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<Long, OrderInfoDto> producerFactory() {
+    public ProducerFactory<Long, OrderInfoAlertDto> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
     @Bean
-    public KafkaTemplate<Long, OrderInfoDto> kafkaTemplate() {
-        KafkaTemplate<Long, OrderInfoDto> template = new KafkaTemplate<>(producerFactory());
+    public KafkaTemplate<Long, OrderInfoAlertDto> kafkaTemplate() {
+        KafkaTemplate<Long, OrderInfoAlertDto> template = new KafkaTemplate<>(producerFactory());
         template.setMessageConverter(new StringJsonMessageConverter());
         return template;
     }
