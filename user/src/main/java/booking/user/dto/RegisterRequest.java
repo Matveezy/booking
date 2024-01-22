@@ -26,6 +26,5 @@ public class RegisterRequest {
     @NotBlank(message = "password cannot be blank!")
     private String pass;
 
-    @NotNull
     private Instant dateOfBirth;
 }

@@ -36,8 +36,6 @@ public class TokenPreFilter extends AbstractGatewayFilterFactory<TokenPreFilter.
                         .retrieve()
                         .bodyToMono(ValidateTokenResponse.class)
                         .map(response -> {
-                            System.out.println("username - " + response.getLogin());
-                            System.out.println("role - " + response.getAuthorities().get(0));
                             exchange.getRequest().mutate().header("userId", String.valueOf(response.getUserId()));
                             exchange.getRequest().mutate().header("username", response.getLogin());
                             exchange.getRequest().mutate().header("authorities", response.getAuthorities()
