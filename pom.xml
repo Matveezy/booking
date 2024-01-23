@@ -14,8 +14,6 @@
     </properties>
 
     <modules>
-        <module>common</module>
-
         <module>eureka</module>
         <module>config</module>
         <module>security</module>
