@@ -34,3 +34,4 @@ build/
 /pgdata/
 /mongodata/
 /secrets.env
+/receipts/

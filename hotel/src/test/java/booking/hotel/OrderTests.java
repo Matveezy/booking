@@ -6,6 +6,7 @@ import booking.hotel.entity.Role;
 import booking.hotel.feign.WalletServiceClient;
 import booking.hotel.repo.OrderRepository;
 import booking.hotel.security.WithMockCustomUser;
+import booking.hotel.service.ReceiptService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@MockBean(ReceiptService.class)
 @SpringBootTest(value = "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration",
         classes = HotelApplication.class)
 @Transactional

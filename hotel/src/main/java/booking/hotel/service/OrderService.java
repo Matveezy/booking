@@ -13,6 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -27,15 +31,17 @@ public class OrderService {
     private final RoomService roomService;
     private final WalletServiceClient walletServiceClient;
     private final UserService userService;
+    private final ReceiptService receiptService;
 
     private final KafkaTemplate<Long, OrderInfoAlertDto> kafkaTemplate;
 
-    public OrderService(OrderRepository orderRepository, OrderReadMapper orderReadMapper, @Lazy RoomService roomService, WalletServiceClient walletServiceClient, UserService userService, KafkaTemplate<Long, OrderInfoAlertDto> kafkaTemplate) {
+    public OrderService(OrderRepository orderRepository, OrderReadMapper orderReadMapper, @Lazy RoomService roomService, WalletServiceClient walletServiceClient, UserService userService, ReceiptService receiptService, KafkaTemplate<Long, OrderInfoAlertDto> kafkaTemplate) {
         this.orderRepository = orderRepository;
         this.orderReadMapper = orderReadMapper;
         this.roomService = roomService;
         this.walletServiceClient = walletServiceClient;
         this.userService = userService;
+        this.receiptService = receiptService;
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -61,9 +67,11 @@ public class OrderService {
                     .dateOut(orderCreateDto.getDateOut())
                     .createdAt(Instant.now())
                     .build();
-            orderRepository.save(orderEntityToSave);
+            var id = orderRepository.save(orderEntityToSave).getId();
 
-            alertOrderCreated(userId, orderEntityToSave);
+            var orderInfo = createOrderInfo(userId, orderEntityToSave);
+            alertOrderCreated(id, orderInfo);
+            sendReceipt(id, orderInfo);
 
             return orderReadMapper.mapToDto(orderEntityToSave);
         } else throw new FailedOrderException("Room is not free");
@@ -75,9 +83,9 @@ public class OrderService {
                 .toList();
     }
 
-    public void alertOrderCreated(long userId, Order order) {
+    public OrderInfoAlertDto createOrderInfo(long userId, Order order) {
         var user = userService.findById(userId);
-        var dto = OrderInfoAlertDto.builder()
+        return OrderInfoAlertDto.builder()
                 .user(UserInfoAlertDto.builder()
                                 .login(user.getLogin())
                                 .name(user.getName())
@@ -89,10 +97,41 @@ public class OrderService {
                 .dateIn(order.getDateIn())
                 .dateOut(order.getDateOut())
                 .build();
-        alertOrderCreated(dto);
     }
 
-    public void alertOrderCreated(OrderInfoAlertDto order) {
+    public void alertOrderCreated(long id, OrderInfoAlertDto order) {
         kafkaTemplate.send("alerts", order);
+    }
+
+    public void sendReceipt(long orderId, OrderInfoAlertDto order) {
+        try {
+            File receipt = new File("./receipts/" + orderId);
+            receipt.createNewFile();
+
+            var orderDetails = """
+                Order №%d:
+                
+                Hotel info:
+                    Name: %s
+                    City: %s
+                    Date in: %s
+                    Date out: %s
+                    
+                Guest info:
+                    Name: %s
+                    
+                
+                """.formatted(orderId,
+                    order.getHotel().getName(), order.getHotel().getCity(), order.getDateIn(), order.getDateOut(),
+                    order.getUser().getName()
+            );
+
+            Files.write(receipt.toPath(), orderDetails.getBytes());
+
+            receiptService.sendMessage(receipt);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
