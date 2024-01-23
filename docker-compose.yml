@@ -152,6 +152,8 @@ services:
         condition: service_healthy
       mongo:
         condition: service_started
+    ports:
+      - "6666:6666"
     environment:
       - CONFIGSERVER_URI=http://config:8888
       - EUREKA_HOST=eureka
