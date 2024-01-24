@@ -113,6 +113,7 @@ services:
         condition: service_healthy
     environment:
       - CONFIGSERVER_URI=http://config:8888
+      - WEBSOCKET_URL=ws://files:6666
       - EUREKA_HOST=eureka
       - HOST=db
       - PORT=${PG_PORT}
