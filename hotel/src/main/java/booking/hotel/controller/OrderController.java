@@ -3,6 +3,8 @@ package booking.hotel.controller;
 import booking.hotel.dto.OrderCreateDto;
 import booking.hotel.dto.OrderInfoDto;
 import booking.hotel.service.OrderService;
+import feign.FeignException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,5 +32,16 @@ public class OrderController {
     @PreAuthorize("permitAll()")
     public ResponseEntity<List<OrderInfoDto>> getOrdersByRoomId(@RequestParam long roomId) {
         return ResponseEntity.ok(orderService.getOrdersByRoomId(roomId));
+    }
+
+
+    @ExceptionHandler({CallNotPermittedException.class})
+    public ResponseEntity<?> handleExternalServiceExceptions() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("External service is unavailable now.");
+    }
+
+    @ExceptionHandler({FeignException.class})
+    public ResponseEntity<?> handleUnexpectedServiceExceptions() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Couldn't make call for external service.");
     }
 }
