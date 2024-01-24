@@ -105,7 +105,7 @@ public class OrderService {
 
     public void sendReceipt(long orderId, OrderInfoAlertDto order) {
         try {
-            File receipt = new File("./receipts/" + orderId);
+            File receipt = new File(String.valueOf(orderId));
             receipt.createNewFile();
 
             var orderDetails = """
