@@ -122,7 +122,9 @@ services:
       - PASS=${POSTGRES_PASSWORD}
       - KAFKA_HOST=${KAFKA_HOST}
       - KAFKA_PORT=${KAFKA_PORT}
-
+    volumes:
+      - .:.
+      
   alerts:
     build:
       context: .
