@@ -2,6 +2,8 @@ package booking.user.controller;
 
 import booking.user.dto.*;
 import booking.user.service.UserService;
+import feign.FeignException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -41,6 +43,16 @@ public class UserController {
     public UserReadDto findUserByLogin(@PathVariable String login) {
         return userService.findUserByLogin(login).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
                 .block();
+    }
+
+    @ExceptionHandler({CallNotPermittedException.class})
+    public ResponseEntity<?> handleExternalServiceExceptions() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("External service is unavailable now.");
+    }
+
+    @ExceptionHandler({FeignException.class})
+    public ResponseEntity<?> handleUnexpectedServiceExceptions() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Couldn't make call for external service.");
     }
 }
 

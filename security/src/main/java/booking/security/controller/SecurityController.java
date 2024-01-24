@@ -7,8 +7,11 @@ import booking.security.dto.ValidateTokenResponse;
 import booking.security.entity.Role;
 import booking.security.service.AuthenticationService;
 import booking.security.service.UserService;
+import feign.FeignException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -53,5 +56,15 @@ public class SecurityController {
                         .isAuthenticated(true)
                         .build()
         );
+    }
+
+    @ExceptionHandler({CallNotPermittedException.class})
+    public ResponseEntity<?> handleExternalServiceExceptions() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("External service is unavailable now.");
+    }
+
+    @ExceptionHandler({FeignException.class})
+    public ResponseEntity<?> handleUnexpectedServiceExceptions() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Couldn't make call for external service.");
     }
 }
