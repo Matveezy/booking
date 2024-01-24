@@ -122,6 +122,8 @@ services:
       - PASS=${POSTGRES_PASSWORD}
       - KAFKA_HOST=${KAFKA_HOST}
       - KAFKA_PORT=${KAFKA_PORT}
+    volumes:
+      - shared:.
 
   alerts:
     build:
@@ -163,6 +165,8 @@ services:
       - NAME=${MONGO_DB}
       - USER=${MONGO_USER}
       - PASS=${MONGO_PASS}
+    volumes:
+      - shared:.
 
   gateway:
     build:
@@ -249,3 +253,6 @@ services:
       kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic alerts --replication-factor 1 --partitions 1
       kafka-topics --bootstrap-server kafka:29092 --list
       "
+
+volumes:
+  shared:
